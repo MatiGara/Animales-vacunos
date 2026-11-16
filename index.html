@@ -1,0 +1,2224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d3a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Terneros">
+<title>Terneros</title>
+<style>
+:root{
+  --bg:#f4f1ea; --card:#ffffff; --text:#1f2a22; --muted:#6b7468; --line:#e2ddd1;
+  --accent:#2f5d3a; --accent-2:#e8efe6; --ok:#1f7a3a; --bad:#b3261e; --warn:#9a6700; --warn-bg:#fff4d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141815; --card:#1e241f; --text:#e7ece6; --muted:#9aa597; --line:#2f3830;
+    --accent:#7fbf8c; --accent-2:#25302a; --ok:#6fd08a; --bad:#ff8a80; --warn:#f0c060; --warn-bg:#3a3220;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141815; --card:#1e241f; --text:#e7ece6; --muted:#9aa597; --line:#2f3830;
+  --accent:#7fbf8c; --accent-2:#25302a; --ok:#6fd08a; --bad:#ff8a80; --warn:#f0c060; --warn-bg:#3a3220;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:15;background:var(--accent);color:#fff;padding:8px 12px 8px 6px;display:flex;align-items:center;gap:6px;min-height:56px}
+:root[data-theme="dark"] header{color:#10160f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) header{color:#10160f}}
+#menuBtn{background:none;color:inherit;padding:8px 10px;display:flex;border-radius:10px}
+#menuBtn:hover,#menuBtn[aria-expanded="true"]{background:rgba(255,255,255,.18)}
+.htit{flex:1;min-width:0;line-height:1.15}
+.hgrp{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.hpag{font-size:19px;font-weight:700}
+#btnBuscar{background:rgba(255,255,255,.18);color:inherit;padding:8px;display:flex;border-radius:10px}
+.ficha .rows{margin-bottom:6px}.ficha h3{margin:12px 0 4px}
+#stockBadge{font-size:14px;font-weight:600;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px;white-space:nowrap}
+/* menú desplegable */
+#menuFondo{position:fixed;inset:0;z-index:13;background:rgba(0,0,0,.35)}
+#menu{position:fixed;top:56px;left:0;right:0;z-index:14;background:var(--card);border-bottom:1px solid var(--line);
+  box-shadow:0 10px 24px rgba(0,0,0,.18);max-height:calc(100vh - 56px);overflow-y:auto;padding:6px 0 10px}
+#menu .mgrp{max-width:640px;margin:0 auto;padding:0 12px}
+#menu .mhead{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;font-weight:800;font-size:15px;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:12px 6px}
+#menu .mhead .chev{transition:transform .15s}
+#menu .mhead[aria-expanded="false"] .chev{transform:rotate(-90deg)}
+#menu .mitems{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 8px}
+#menu .mitems[hidden]{display:none}
+#menu .mitems button{text-align:left;font-weight:600;padding:13px 14px}
+#menu .mitems button.activo{background:var(--accent);color:#fff}
+:root[data-theme="dark"] #menu .mitems button.activo{color:#10160f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #menu .mitems button.activo{color:#10160f}}
+main{max-width:640px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.active{display:block}
+h2{font-size:18px;margin:4px 0 12px}
+h3{font-size:15px;margin:20px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
+textarea{min-height:56px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+.seg{display:flex;gap:6px}
+.seg button{flex:1}
+button{font:inherit;border:0;border-radius:10px;padding:11px 14px;cursor:pointer;background:var(--accent-2);color:var(--text)}
+button.primary{background:var(--accent);color:#fff;font-weight:600}
+:root[data-theme="dark"] button.primary{color:#10160f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#10160f}}
+button.on{background:var(--accent);color:#fff}
+button.small{padding:6px 10px;font-size:14px}
+button.danger{color:var(--bad)}
+.actions{display:flex;gap:8px;margin-top:12px}
+.actions .primary{flex:1}
+.preview{margin-top:10px;font-size:14px;color:var(--muted)}
+.preview b{color:var(--text)}
+.item{display:flex;flex-direction:column;gap:6px}
+.item .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.item .title{font-weight:700}
+.item .sub{font-size:14px;color:var(--muted)}
+.item .btns{display:flex;gap:6px;justify-content:flex-end}
+.rows{font-size:14px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.rows .r{text-align:right;font-variant-numeric:tabular-nums}
+.big{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+.alert{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+.alert.bad{color:var(--bad)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.empty{color:var(--muted);text-align:center;padding:18px;font-size:14px}
+.btnlist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+dialog{border:0;border-radius:16px;background:var(--card);color:var(--text);padding:18px;max-width:min(420px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog .dbtns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.editing{border:2px solid var(--accent)}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.informe table.inf{font-size:13px;margin-bottom:6px}.informe .r{text-align:right}.informe h3{margin:14px 0 4px}
+.informe td,.informe th{text-align:left}.informe td.r,.informe th.r{text-align:right}
+input[readonly]{opacity:.65}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--warn-bg);color:var(--warn)}
+.sep{border-top:1px dashed var(--line);margin:6px 0 2px}
+/* guía de conexión con Drive */
+#wiz{position:fixed;inset:0;z-index:30;background:var(--bg);overflow-y:auto;padding:20px 16px calc(24px + env(safe-area-inset-bottom))}
+.wizcard{max-width:560px;margin:0 auto}
+.wizcard h2{font-size:22px;margin:6px 0 10px}
+.wizcard p,.wizcard li{font-size:15px}
+.wizdots{display:flex;gap:6px;margin-bottom:14px}
+.wizdots span{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.wizdots span.on{background:var(--accent)}
+.wizbtns{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.wizbtns .fila{display:flex;gap:8px}.wizbtns .fila button{flex:1}
+ol.pasos{padding-left:22px;margin:8px 0}ol.pasos li{margin:10px 0}
+.gbtn{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 7px;background:var(--card);font-weight:700;font-size:14px;white-space:nowrap;line-height:1.6}
+.gblue{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.shot{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:12px 14px;margin:12px 0;font-size:14px}
+.shot .t{font-weight:700;margin-bottom:6px}
+.shot.warn{border-color:#d93025}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--accent-2);color:var(--accent);margin-bottom:6px}
+.linkbox{word-break:break-all;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+.ok{color:var(--ok);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <button id="menuBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <div class="htit"><div class="hgrp" id="hGrupo"></div><div class="hpag" id="hPagina"></div></div>
+  <button id="btnBuscar" aria-label="Buscar animal o leer chip" title="Buscar animal o leer chip" onclick="abrirBuscador()">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+  </button>
+  <div id="stockBadge"></div>
+</header>
+<div id="menuFondo" hidden></div>
+<nav id="menu" hidden aria-label="Menú">
+  <div class="mgrp">
+    <button class="mhead" data-grp="terneros" aria-expanded="true">Terneros<span class="chev">▾</span></button>
+    <div class="mitems" data-grp="terneros">
+      <button data-ir="compras">Compras</button><button data-ir="ventas">Ventas</button>
+      <button data-ir="engorde">Engorde</button><button data-ir="resumen">Resumen</button>
+      <button data-ir="personas">Personas</button>
+    </div>
+  </div>
+  <div class="mgrp">
+    <button class="mhead" data-grp="vacas" aria-expanded="true">Vacas<span class="chev">▾</span></button>
+    <div class="mitems" data-grp="vacas">
+      <button data-ir="vacas-stock">Stock</button><button data-ir="vacas-compras">Compras</button>
+      <button data-ir="vacas-ventas">Ventas</button><button data-ir="vacas-cria">Cría</button>
+      <button data-ir="vacas-gastos">Gastos</button><button data-ir="vacas-resumen">Resumen</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+<div id="aviso"></div>
+<!-- ============ COMPRAS ============ -->
+<section id="tab-compras" class="tab active">
+  <form id="fCompra" class="card" autocomplete="off">
+    <h2 id="fCompraTit">Nueva compra (lote)</h2>
+    <div class="grid">
+      <div><label>Fecha</label><input type="date" name="fecha" required></div>
+      <div><label>Cantidad de terneros</label><input name="cantidad" inputmode="numeric" required></div>
+      <div><label>Kilos totales del lote</label><input name="kg" inputmode="decimal" required></div>
+      <div><label>Precio</label>
+        <select name="modo"><option value="kg">por kilo</option><option value="total">total del lote</option></select></div>
+      <div><label id="lblPrecioC">Precio por kilo $</label><input name="precio" inputmode="decimal" required></div>
+      <div><label>Flete, comisión, guías $</label><input name="gastos" inputmode="decimal" placeholder="0"></div>
+      <div class="full"><label>¿De quién es esta compra?</label><select name="dueno" class="selDueno" data-modo="compra"></select>
+        <div class="hint hintPersonas"></div>
+        <div id="boxComp" hidden style="margin-top:8px"></div></div>
+      <div class="full"><label>Vendedor / remate</label><input name="tercero"></div>
+      <div class="full"><label>Caravanas (opcional)</label><textarea name="caravanas" placeholder="Ej: 1001-1020, 1035, 1040"></textarea>
+        <div class="hint">Separadas por coma o espacio. Un rango se escribe 1001-1020. Pueden ser menos que los terneros: a los que falten se les asigna caravana después, desde la lista de compras.</div></div>
+      <div class="full"><label>Observaciones</label><textarea name="obs"></textarea></div>
+    </div>
+    <div class="preview" id="pvCompra"></div>
+    <div class="actions"><button type="button" id="cancelCompra" hidden>Cancelar</button><button class="primary">Guardar compra</button></div>
+  </form>
+  <h3>Compras cargadas</h3>
+  <div id="listCompras"></div>
+</section>
+
+<!-- ============ VENTAS ============ -->
+<section id="tab-ventas" class="tab">
+  <form id="fVenta" class="card" autocomplete="off">
+    <div class="seg" style="margin-bottom:12px">
+      <button type="button" data-tipov="venta" class="on">Venta</button>
+      <button type="button" data-tipov="baja">Baja de stock</button>
+    </div>
+    <h2 id="fVentaTit">Nueva venta (lote)</h2>
+    <div class="hint soloBaja" hidden style="margin:-6px 0 10px">Para sacar animales del stock sin venderlos: muerte, robo, consumo propio, etc. Se registra como pérdida.</div>
+    <label>¿De quién son los terneros que salen?</label>
+    <select name="dueno" class="selDueno" data-modo="venta" style="margin-bottom:10px"></select>
+    <label>¿Qué terneros salen?</label>
+    <div class="seg" style="margin-bottom:10px">
+      <button type="button" data-salida="auto" class="on">Los más viejos</button>
+      <button type="button" data-salida="car">Por caravana</button>
+    </div>
+    <div id="boxCarV" hidden style="margin-bottom:10px"><label>Caravanas que salen</label><textarea name="caravanas" placeholder="Ej: 1001-1010, 1035"></textarea>
+      <div class="hint">Cada animal sale del lote donde está su caravana.</div>
+      <label style="margin-top:8px">Además, terneros sin caravana que salen</label><input name="sinCar" inputmode="numeric" placeholder="0">
+      <div class="hint">La cantidad total se completa sola.</div></div>
+    <div class="grid">
+      <div><label>Fecha</label><input type="date" name="fecha" required></div>
+      <div><label>Cantidad de terneros</label><input name="cantidad" inputmode="numeric" required></div>
+      <div class="soloBaja" hidden><label>Motivo</label>
+        <select name="motivo"><option>Muerte</option><option>Robo / pérdida</option><option>Consumo propio</option><option>Otro</option></select></div>
+      <div class="soloVenta"><label>Kilos totales vendidos</label><input name="kg" inputmode="decimal"></div>
+      <div class="soloVenta"><label>Precio</label>
+        <select name="modo"><option value="kg">por kilo</option><option value="total">total del lote</option></select></div>
+      <div class="soloVenta"><label id="lblPrecioV">Precio por kilo $</label><input name="precio" inputmode="decimal"></div>
+      <div class="soloVenta"><label>Flete, comisión, guías $</label><input name="gastos" inputmode="decimal" placeholder="0"></div>
+      <div class="full soloVenta"><label>Comprador / remate</label><input name="tercero"></div>
+      <div class="full"><label>Observaciones</label><textarea name="obs"></textarea></div>
+    </div>
+    <div id="pvVenta"></div>
+    <div class="actions"><button type="button" id="cancelVenta" hidden>Cancelar</button><button class="primary" id="btnGuardarV">Guardar venta</button></div>
+  </form>
+  <h3>Ventas, bajas y ganancias</h3>
+  <div id="listVentas"></div>
+</section>
+
+<!-- ============ ENGORDE ============ -->
+<section id="tab-engorde" class="tab">
+  <div class="seg" style="margin-bottom:12px">
+    <button type="button" data-eng="gastos" class="on">Gastos</button>
+    <button type="button" data-eng="pesadas">Pesadas</button>
+  </div>
+  <div id="engPesadas" hidden>
+    <form id="fPesada" class="card" autocomplete="off">
+      <h2 id="fPesadaTit">Nueva pesada</h2>
+      <div class="hint" style="margin:-6px 0 10px">Se pesa cada tanto, no todos los días. Con cada pesada la app calcula cuántos kilos por día ganaron.</div>
+      <div class="seg" style="margin-bottom:10px">
+        <button type="button" data-pmodo="lote" class="on">Un lote</button>
+        <button type="button" data-pmodo="animal">Un animal (caravana)</button>
+      </div>
+      <div class="grid">
+        <div><label>Fecha</label><input type="date" name="fecha"></div>
+        <div class="soloAnimal" hidden><label>Caravana</label><input name="caravana" autocomplete="off"></div>
+        <div class="full soloLote"><label>Lote</label><select name="lote"></select></div>
+        <div class="soloLote"><label>Animales pesados</label><input name="cantidad" inputmode="numeric"></div>
+        <div><label id="lblKgP">Kilos totales</label><input name="kg" inputmode="decimal"></div>
+        <div class="full"><label>Observaciones</label><input name="obs"></div>
+      </div>
+      <div class="preview" id="pvPesada"></div>
+      <div class="actions"><button type="button" id="cancelPesada" hidden>Cancelar</button><button class="primary">Guardar pesada</button></div>
+    </form>
+    <h3>Pesadas cargadas</h3>
+    <div id="listPesadas"></div>
+  </div>
+  <div id="engGastos">
+  <form id="fGasto" class="card" autocomplete="off">
+    <h2 id="fGastoTit">Carga de gastos de engorde</h2>
+    <div class="seg" style="margin-bottom:10px">
+      <button type="button" data-tipo="dias">Días</button>
+      <button type="button" data-tipo="mensual" class="on">Mes</button>
+      <button type="button" data-tipo="anual">Año/s</button>
+    </div>
+    <div class="grid">
+      <div class="full" id="boxMes"><label>Mes</label><input type="month" name="mes"></div>
+      <div id="boxDias1" hidden><label>Desde</label><input type="date" name="desde"></div>
+      <div id="boxDias2" hidden><label>Cantidad de días</label><input name="dias" inputmode="numeric"></div>
+      <div id="boxAnio1" hidden><label>Desde el año</label><input name="anio" inputmode="numeric"></div>
+      <div id="boxAnio2" hidden><label>Cantidad de años</label><input name="anios" inputmode="numeric" placeholder="1"></div>
+      <div class="full preview" id="pvPeriodo" style="margin-top:0"></div>
+      <div><label>Maíz (toneladas)</label><input name="maizTn" inputmode="decimal" placeholder="0"></div>
+      <div><label>Costo maíz $</label><input name="maizCosto" inputmode="decimal" placeholder="0"></div>
+      <div><label>Campo destinado (ha)</label><input name="campoHa" inputmode="decimal" placeholder="0"></div>
+      <div><label>Costo campo / alquiler $</label><input name="campoCosto" inputmode="decimal" placeholder="0"></div>
+      <div><label>Veterinaria $</label><input name="veterinaria" inputmode="decimal" placeholder="0"></div>
+      <div><label>Empleado $</label><input name="empleado" inputmode="decimal" placeholder="0"></div>
+      <div class="full"><label>Observaciones</label><textarea name="obs"></textarea></div>
+    </div>
+    <div class="preview" id="pvGasto"></div>
+    <div class="actions"><button type="button" id="cancelGasto" hidden>Cancelar</button><button class="primary">Guardar gastos</button></div>
+  </form>
+  <div class="alert" style="color:var(--muted);background:var(--accent-2)">Los gastos se reparten entre los terneros que había en stock cada día de ese período. Así, cada animal carga con lo que comió mientras estuvo en el campo.</div>
+  <h3>Gastos cargados</h3>
+  <div id="listGastos"></div>
+  </div>
+</section>
+
+<!-- ============ VACAS (las arma el script: ver "VACAS" más abajo) ============ -->
+<section id="tab-v-stock" class="tab"></section>
+<section id="tab-v-compras" class="tab"></section>
+<section id="tab-v-ventas" class="tab"></section>
+<section id="tab-v-cria" class="tab"></section>
+<section id="tab-v-gastos" class="tab"></section>
+<section id="tab-v-resumen" class="tab"></section>
+
+<!-- ============ PERSONAS (inversores) ============ -->
+<section id="tab-personas" class="tab">
+  <form id="fPersona" class="card" autocomplete="off">
+    <h2 id="fPersonaTit">Nueva persona</h2>
+    <div class="hint" style="margin:-6px 0 10px">Las personas que invierten en terneros. En cada compra se indica de quién es, y en el Resumen se ve el resultado de cada una.</div>
+    <div class="grid">
+      <div class="full"><label>Nombre</label><input name="nombre" maxlength="60"></div>
+      <div class="full"><label>Observaciones (opcional)</label><input name="obs" maxlength="200"></div>
+    </div>
+    <div class="actions"><button type="button" id="cancelPersona" hidden>Cancelar</button><button class="primary">Guardar persona</button></div>
+  </form>
+  <h3>Personas</h3>
+  <div id="listPersonas"></div>
+</section>
+
+<!-- ============ RESUMEN ============ -->
+<section id="tab-resumen" class="tab">
+  <div id="resumen"></div>
+  <h3>Buscar caravana</h3>
+  <div class="card"><input id="qCar" placeholder="Número de caravana" autocomplete="off"><div id="rCar" class="preview"></div></div>
+  <h3>Inflación (IPC INDEC)</h3>
+  <div class="card">
+    <div id="inflEstado" class="preview" style="margin-top:0"></div>
+    <div class="actions"><button type="button" id="btnInfl" class="primary">Actualizar desde internet</button></div>
+    <p style="font-size:14px;color:var(--muted);margin:14px 0 6px">Cargar o corregir un mes a mano (pisa el dato bajado):</p>
+    <form id="fInfl" class="grid" autocomplete="off">
+      <div><label>Mes</label><input type="month" name="mes" required></div>
+      <div><label>Inflación del mes %</label><input name="pct" inputmode="decimal" required placeholder="Ej: 2,1"></div>
+      <div class="full"><button class="primary" style="width:100%">Guardar mes</button></div>
+    </form>
+    <div id="inflManual"></div>
+  </div>
+  <h3>Exportar (se abre en Excel)</h3>
+  <div class="card">
+    <div class="btnlist">
+      <button data-exp="compras">Compras</button>
+      <button data-exp="ventas">Ventas y ganancias</button>
+      <button data-exp="stock">Stock actual</button>
+      <button data-exp="gastos">Gastos de engorde</button>
+      <button data-exp="personas" style="grid-column:1/-1">Resumen por persona</button>
+    </div>
+  </div>
+  <h3>Google Drive</h3>
+  <div class="card"><div id="driveEstado" class="preview" style="margin-top:0"></div><div class="btnlist" id="driveBtns" style="margin-top:12px"></div></div>
+  <h3>Copia de seguridad</h3>
+  <div class="card">
+    <p class="sub" style="margin:0 0 10px;font-size:14px;color:var(--muted)">Un archivo con todos los datos, para guardar donde quieras (WhatsApp, mail, Drive). Si no conectaste Google Drive, hacé una de vez en cuando: los datos están solo en este celular.</p>
+    <div class="btnlist">
+      <button id="btnBackup">Guardar copia</button>
+      <button id="btnRestore">Restaurar copia</button>
+    </div>
+    <input type="file" id="fileRestore" accept=".json,application/json" hidden>
+  </div>
+</section>
+</main>
+
+
+<div id="wiz" hidden><div class="wizcard"><div class="wizdots" id="wizDots"></div><div id="wizBody"></div><div class="wizbtns" id="wizBtns"></div></div></div>
+
+<dialog id="dlg"><div id="dlgBody"></div><div class="dbtns" id="dlgBtns"></div></dialog>
+
+<script src="logica.js"></script>
+<script>
+"use strict";
+let R = calc(db);
+
+/* ---------- diálogo ---------- */
+function ask(html, botones){
+  return new Promise(res => {
+    $('#dlgBody').innerHTML = html;
+    const box = $('#dlgBtns'); box.innerHTML = '';
+    botones.forEach(([val, txt, cls]) => {
+      const b = document.createElement('button'); b.textContent = txt; if (cls) b.className = cls;
+      b.onclick = () => { $('#dlg').close(); res(val); }; box.appendChild(b);
+    });
+    $('#dlg').onclose = () => res(null);
+    $('#dlg').showModal();
+  });
+}
+const avisar = html => ask(html, [['ok', 'Entendido', 'primary']]);
+
+/* ---------- menú desplegable: Terneros / Vacas ---------- */
+const PAGINAS = {
+  terneros: {compras:'Compras', ventas:'Ventas', engorde:'Engorde', resumen:'Resumen', personas:'Personas'},
+  vacas:    {stock:'Stock', compras:'Compras', ventas:'Ventas', cria:'Cría', gastos:'Gastos', resumen:'Resumen'},
+};
+let paginaActual = 'compras';
+function irA(id){
+  const vacas = id.startsWith('vacas-'), grp = vacas ? 'vacas' : 'terneros', pag = vacas ? id.slice(6) : id;
+  if (!PAGINAS[grp][pag]) return;
+  paginaActual = id;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === (vacas ? 'tab-v-' : 'tab-') + pag));
+  document.querySelectorAll('#menu [data-ir]').forEach(b => b.classList.toggle('activo', b.dataset.ir === id));
+  $('#hGrupo').textContent = vacas ? 'Vacas' : 'Terneros';
+  $('#hPagina').textContent = PAGINAS[grp][pag];
+  actualizarBadge();
+  document.title = `${PAGINAS[grp][pag]} · ${vacas ? 'Vacas' : 'Terneros'}`;
+  try { localStorage.setItem(KEY + '-tab', id); } catch(e){}
+  cerrarMenu(); window.scrollTo(0, 0);
+}
+// contador de arriba a la derecha: terneros en stock, o vacas y crías si se está en Vacas
+function actualizarBadge(){
+  const b = $('#stockBadge');
+  if (paginaActual.startsWith('vacas-')) b.textContent = `${VR.S.vacas.n} vacas · ${VR.S.crias.n} crías`;
+  else b.textContent = `${R.enStock} en stock`;
+}
+function abrirMenu(){
+  // al abrir, queda desplegado el grupo de la página actual
+  const grp = paginaActual.startsWith('vacas-') ? 'vacas' : 'terneros';
+  document.querySelectorAll('#menu .mhead').forEach(h => setGrupo(h.dataset.grp, h.dataset.grp === grp));
+  $('#menu').hidden = false; $('#menuFondo').hidden = false; $('#menuBtn').setAttribute('aria-expanded', 'true');
+}
+function cerrarMenu(){ $('#menu').hidden = true; $('#menuFondo').hidden = true; $('#menuBtn').setAttribute('aria-expanded', 'false'); }
+function setGrupo(grp, abierto){
+  $(`#menu .mhead[data-grp="${grp}"]`).setAttribute('aria-expanded', String(abierto));
+  $(`#menu .mitems[data-grp="${grp}"]`).hidden = !abierto;
+}
+$('#menuBtn').onclick = () => $('#menu').hidden ? abrirMenu() : cerrarMenu();
+$('#menuFondo').onclick = cerrarMenu;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#menu').hidden) cerrarMenu(); });
+document.querySelectorAll('#menu .mhead').forEach(h => h.onclick = () => setGrupo(h.dataset.grp, h.getAttribute('aria-expanded') !== 'true'));
+document.querySelectorAll('#menu [data-ir]').forEach(b => b.onclick = () => irA(b.dataset.ir));
+
+/* ---------- formularios de lote (compra / venta) ---------- */
+function leerLote(f){
+  const x = {fecha:f.fecha.value, cantidad:Math.round(num(f.cantidad.value)), kg:num(f.kg.value), modo:f.modo.value,
+          precio:num(f.precio.value), gastos:num(f.gastos.value), tercero:f.tercero.value.trim(), obs:f.obs.value.trim()};
+  if (f.dueno && f.dueno.value === '__comp'){        // compra compartida: los % de cada persona
+    x.duenos = [...f.querySelectorAll('#boxComp [data-cab]')].map(i => ({id:i.dataset.cab, n:Math.round(num(i.value))})).filter(d => d.n > 0);
+  } else if (f.dueno && f.dueno.value) x.dueno = f.dueno.value;
+  return x;
+}
+function llenarLote(f, x){
+  f.fecha.value = x.fecha; f.cantidad.value = x.cantidad; f.kg.value = fmtN(x.kg, 2); f.modo.value = x.modo;
+  f.precio.value = fmtN(x.precio, 2); f.gastos.value = x.gastos ? fmtN(x.gastos, 2) : ''; f.tercero.value = x.tercero || ''; f.obs.value = x.obs || '';
+  if (f.dueno){
+    llenarDuenos(); f.dueno.value = esCompartido(x) ? '__comp' : (x.dueno || '');
+    if (esCompartido(x)) f.querySelectorAll('#boxComp [data-cab]').forEach(i => { const d = x.duenos.find(d => d.id === i.dataset.cab); i.value = d ? Math.round(cabDe(x, d)) : ''; });
+    mostrarComp();
+  }
+}
+// cuadro de "cuántos terneros de cada persona" para una compra compartida
+function mostrarComp(){
+  const box = $('#boxComp'); if (!box) return;
+  box.hidden = fC.dueno.value !== '__comp';
+  const tot = [...box.querySelectorAll('[data-cab]')].reduce((s, i) => s + Math.round(num(i.value)), 0);
+  const cant = Math.round(num(fC.cantidad.value)), t = box.querySelector('.compTot');
+  if (t) t.innerHTML = `Asignados: <b class="${cant && tot === cant ? 'pos' : 'neg'}">${tot}</b> de ${cant || '?'} terneros${cant && tot !== cant ? ` (${tot < cant ? `faltan ${cant - tot}` : `sobran ${tot - cant}`})` : ''}`;
+}
+// opciones de "¿de quién?": en compras, las personas; en ventas, además "General" y el campo (si tiene terneros)
+function llenarDuenos(){
+  const pers = [...(db.personas || [])].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  const hayCampo = db.compras.some(c => c.origen === 'cria'), haySin = db.compras.some(c => c.origen !== 'cria' && !c.dueno && !esCompartido(c));
+  document.querySelectorAll('.selDueno').forEach(s => {
+    const prev = s.value, venta = s.dataset.modo === 'venta';
+    const ops = venta ? [['', 'General: los más viejos de cualquier dueño']] : (pers.length ? [['', 'Elegí una persona…']] : [['', 'Sin asignar']]);
+    pers.forEach(p => ops.push([p.id, p.nombre]));
+    if (!venta && pers.length > 1) ops.push(['__comp', 'Compartido entre varias personas…']);
+    if (venta && hayCampo) ops.push([CAMPO_ID, 'Campo (cría propia)']);
+    if (venta && haySin && pers.length) ops.push(['__sin', 'Sin asignar']);
+    s.innerHTML = ops.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
+    if (ops.some(o => o[0] === prev)) s.value = prev;
+  });
+  // filas de "cuántos terneros" para compra compartida (se conservan los valores escritos)
+  const box = $('#boxComp');
+  if (box){
+    const vals = {}; box.querySelectorAll('[data-cab]').forEach(i => vals[i.dataset.cab] = i.value);
+    box.innerHTML = `<div class="hint" style="margin-bottom:6px">Cuántos terneros del lote son de cada persona (las que no participan, dejalas vacías):</div>
+      <div class="grid">${pers.map(p => `<div><label>${esc(p.nombre)}: terneros</label><input data-cab="${p.id}" inputmode="numeric" value="${esc(vals[p.id] || '')}"></div>`).join('')}</div>
+      <div class="hint compTot" style="margin-top:6px"></div>`;
+    mostrarComp();
+  }
+  document.querySelectorAll('.hintPersonas').forEach(h => h.innerHTML = pers.length ? ''
+    : 'Para indicar de quién es cada compra, cargá los nombres en <a href="#" onclick="irA(\'personas\');return false">Terneros → Personas</a>.');
+}
+function limpiar(f){ f.reset(); if (f.fecha) f.fecha.value = hoy(); }
+function validarLote(x){
+  if (!x.fecha) return 'Falta la fecha.';
+  if (!(x.cantidad > 0)) return 'La cantidad de terneros tiene que ser mayor a 0.';
+  if (x.baja) return null;                 // en una baja no hay kilos ni precio
+  if (!(x.kg > 0)) return 'Faltan los kilos.';
+  if (!(x.precio > 0)) return 'Falta el precio.';
+  return null;
+}
+function probar(nuevoDb){
+  const r = calc(nuevoDb);
+  if (r.errores.length){
+    return {ok:false, msg:`<b>No se puede guardar.</b><br>${r.errores[0].msg}`};
+  }
+  return {ok:true, r};
+}
+
+/* Resultado de una venta (se usa en la lista y en el aviso al guardar) */
+function bloqueResultado(s){
+  if (s.v.baja){                           // baja: no hay cobro, todo lo invertido en esos animales es pérdida
+    return `<div class="rows"><span>Costo de compra</span><span class="r">${fmtM(s.costo)}</span>
+        <span>Gastos de engorde</span><span class="r">${fmtM(s.engorde)}</span></div>
+      <div class="top" style="margin-top:4px"><span>Pérdida por animal</span><span class="big neg">${fmtM(-s.ganU)}</span></div>
+      <div class="top"><span class="sub">Pérdida total</span><b class="neg">${fmtM(-s.gan)}</b></div>
+      ${s.realOk ? `<div class="sub">Ajustada por inflación: ${fmtM(-s.ganR)}${s.prov ? ' (provisorio)' : ''}</div>` : ''}`;
+  }
+  const real = s.realOk
+    ? `<div class="sep"></div>
+       <div class="rows"><span>Inflación del período</span><span class="r">${fmtP(s.inflP)}</span>
+       <span>Costo + engorde en pesos de la venta</span><span class="r">− ${fmtM(s.costoR + s.engR)}</span></div>
+       <div class="top"><span>Ganancia ajustada por inflación ${s.prov ? '<span class="tag">provisoria</span>' : ''}</span>
+         <span style="text-align:right"><b class="${signo(s.ganRU)}">${fmtM(s.ganRU)}</b> <span class="${signo(s.pctR)}">(${fmtP(s.pctR)})</span></span></div>
+       ${s.prov ? `<div class="sub">Usa una estimación para los meses que el INDEC todavía no publicó. Se corrige sola al actualizar.</div>` : ''}`
+    : `<div class="sub">Sin datos de inflación para estas fechas. Actualizá en Resumen para ver la ganancia ajustada.</div>`;
+  return `<div class="rows"><span>Cobrado (neto)</span><span class="r">${fmtM(s.neto)}</span>
+      <span>Costo de compra</span><span class="r">− ${fmtM(s.costo)}</span>
+      <span>Gastos de engorde</span><span class="r">− ${fmtM(s.engorde)}</span></div>
+    <div class="top" style="margin-top:4px"><span>Ganancia por ternero</span><span class="big ${signo(s.ganU)}">${fmtM(s.ganU)}</span></div>
+    <div class="top"><span class="sub">Total del lote</span><span><b class="${signo(s.gan)}">${fmtM(s.gan)}</b> <span class="${signo(s.pct)}">(${fmtP(s.pct)} sobre lo invertido)</span></span></div>
+    ${real}`;
+}
+
+/* Compras */
+const fC = $('#fCompra'); let editC = null;
+fC.modo.onchange = () => { $('#lblPrecioC').textContent = fC.modo.value === 'kg' ? 'Precio por kilo $' : 'Precio total del lote $'; pvCompra(); };
+fC.oninput = pvCompra;
+fC.cantidad.addEventListener('input', () => { fC.cantidad.dataset.auto = ''; });   // si la escribe la persona, no se pisa
+// todas las caravanas ya usadas (en compras y asignaciones), salvo las de la compra que se está editando
+function caravanasUsadas(exceptoCompraId){
+  const m = new Map();
+  for (const c of db.compras){
+    if (c.id !== exceptoCompraId) (c.caravanas || []).forEach(t => m.set(t, `la compra del ${fmtF(c.fecha)}`));
+    for (const a of (c.asignaciones || [])) a.caravanas.forEach(t => m.set(t, `las asignadas el ${fmtF(a.fecha)} al lote del ${fmtF(c.fecha)}`));
+  }
+  return m;
+}
+function pvCompra(){
+  mostrarComp();
+  const pc = parseCaravanas(fC.caravanas.value);
+  if (pc.list.length && (!fC.cantidad.value || fC.cantidad.dataset.auto)){ fC.cantidad.value = pc.list.length; fC.cantidad.dataset.auto = '1'; }
+  const x = leerLote(fC);
+  let h = x.cantidad > 0 && x.precio > 0
+    ? `Costo total <b>${fmtM(costoCompra(x))}</b> · por ternero <b>${fmtM(costoCompra(x)/x.cantidad)}</b>` + (x.kg ? ` · <b>${fmtN(x.kg/x.cantidad,1)} kg</b> promedio` : '')
+    : '';
+  if (pc.list.length){
+    h += `<br><b>${pc.list.length}</b> caravanas`;
+    if (x.cantidad > pc.list.length) h += ` · <b>${x.cantidad - pc.list.length}</b> sin caravana (se pueden asignar después)`;
+    if (x.cantidad && x.cantidad < pc.list.length) h += `<div class="alert bad">Hay más caravanas (${pc.list.length}) que terneros (${x.cantidad}).</div>`;
+  }
+  if (pc.errs.length) h += `<div class="alert bad">No entiendo: ${esc(pc.errs.join(', '))}</div>`;
+  if (pc.dups.length) h += `<div class="alert bad">Repetidas: ${esc(pc.dups.join(', '))}</div>`;
+  $('#pvCompra').innerHTML = h;
+}
+fC.onsubmit = async e => {
+  e.preventDefault();
+  const pc = parseCaravanas(fC.caravanas.value);
+  if (pc.errs.length) return avisar(`No entiendo estas caravanas: ${esc(pc.errs.join(', '))}`);
+  if (pc.dups.length) return avisar(`Estas caravanas están repetidas: ${esc(pc.dups.join(', '))}`);
+  const x = leerLote(fC), err = validarLote(x); if (err) return avisar(err);
+  if (fC.dueno.value === '__comp'){
+    const tot = (x.duenos || []).reduce((s, d) => s + d.n, 0);
+    if ((x.duenos || []).length < 2) return avisar('En una compra compartida tiene que haber al menos dos personas con sus terneros.');
+    if (tot !== x.cantidad) return avisar(`Asignaste ${tot} terneros y el lote tiene ${x.cantidad}: tienen que coincidir.`);
+  } else if ((db.personas || []).length && !x.dueno) return avisar('Elegí de quién es esta compra.');
+  if (pc.list.length){
+    if (pc.list.length > x.cantidad) return avisar(`Hay más caravanas (${pc.list.length}) que terneros (${x.cantidad}).`);
+    const usadas = caravanasUsadas(editC), rep = pc.list.find(t => usadas.has(t));
+    if (rep) return avisar(`La caravana ${esc(rep)} ya está en ${usadas.get(rep)}.`);
+    x.caravanas = pc.list;
+  }
+  const prev = editC ? db.compras.find(c => c.id === editC) : null;
+  const item = {...x, id: editC || uid(), creado: prev ? prev.creado : Date.now()};
+  if (prev && prev.asignaciones && prev.asignaciones.length) item.asignaciones = prev.asignaciones;
+  const nuevo = {...db, compras: editC ? db.compras.map(c => c.id === editC ? item : c) : [...db.compras, item]};
+  const t = probar(nuevo); if (!t.ok) return avisar(t.msg + '<br><br>Revisá la fecha, la cantidad o las caravanas de esta compra.');
+  db = nuevo; save(); cancelar('C'); render();
+};
+$('#cancelCompra').onclick = () => cancelar('C');
+
+/* Personas (inversores) */
+const fP = $('#fPersona'); let editP = null;
+function cancelarPersona(){ editP = null; fP.reset(); $('#fPersonaTit').textContent = 'Nueva persona'; $('#cancelPersona').hidden = true; fP.classList.remove('editing'); }
+fP.onsubmit = e => {
+  e.preventDefault();
+  const nombre = fP.nombre.value.trim().replace(/\s+/g, ' '), obs = fP.obs.value.trim();
+  if (!nombre) return avisar('Escribí el nombre.');
+  if ((db.personas || []).some(p => p.id !== editP && p.nombre.toLowerCase() === nombre.toLowerCase())) return avisar(`Ya hay una persona llamada ${esc(nombre)}.`);
+  const prev = editP ? db.personas.find(p => p.id === editP) : null;
+  const item = {id: prev ? prev.id : uid(), creado: prev ? prev.creado : Date.now(), nombre, obs};
+  db = {...db, personas: prev ? db.personas.map(p => p.id === prev.id ? item : p) : [...(db.personas || []), item]};
+  save(); cancelarPersona(); render();
+};
+$('#cancelPersona').onclick = cancelarPersona;
+function editarPersona(id){
+  const p = db.personas.find(x => x.id === id); editP = id;
+  fP.nombre.value = p.nombre; fP.obs.value = p.obs || '';
+  $('#fPersonaTit').textContent = 'Editando persona'; $('#cancelPersona').hidden = false; fP.classList.add('editing'); window.scrollTo(0, 0);
+}
+async function borrarPersona(id){
+  const p = db.personas.find(x => x.id === id);
+  const usos = db.compras.filter(c => c.dueno === id || (c.duenos || []).some(d => d.id === id)).length + db.ventas.filter(v => v.dueno === id).length;
+  if (usos) return avisar(`<b>No se puede borrar a ${esc(p.nombre)}.</b><br>Tiene ${usos} compras o ventas a su nombre. Primero pasalas a otra persona (Editar en cada una).`);
+  if (await ask(`<h2>¿Borrar a ${esc(p.nombre)}?</h2>`, [['si','Borrar','danger'], ['no','Cancelar']]) !== 'si') return;
+  db = {...db, personas: db.personas.filter(x => x.id !== id)}; save(); render();
+}
+
+/* ---------- pesadas: kilos ganados por día ---------- */
+// Para cada pesada calcula el peso promedio y la ganancia diaria (desde la pesada anterior y desde la compra).
+// Para cada lote deja el último peso conocido y su ganancia diaria, para estimar el peso de hoy.
+function analisisPesos(pesadas){
+  const lotes = new Map(R.lots.map(L => [L.c.id, {L, kg0:L.kgU, d0:L.day, ult:null, adpv:null, animales:[]}]));
+  const porPesada = new Map(), ultAnimal = new Map();
+  const orden = [...pesadas].sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.creado || 0) - (b.creado || 0));
+  for (const p of orden){
+    const info = lotes.get(p.compraId); if (!info) continue;
+    const dia = dayNum(p.fecha), prom = p.tipo === 'animal' ? p.kg : p.kg / p.cantidad;
+    const ganDia = (kgA, dA) => dia > dA && kgA > 0 ? (prom - kgA) / (dia - dA) : null;
+    const prev = p.tipo === 'animal' ? (ultAnimal.get(p.caravana) || info.ult) : info.ult;
+    const r = {prom, info, adpvPrev: prev ? ganDia(prev.kg, prev.dia) : null, adpvCompra: ganDia(info.kg0, info.d0), desde: prev ? prev.dia : null};
+    porPesada.set(p.id, r);
+    if (p.tipo === 'animal'){ ultAnimal.set(p.caravana, {kg:prom, dia}); if (r.adpvCompra != null) info.animales.push(r.adpvCompra); }
+    else { info.ult = {kg:prom, dia}; if (r.adpvCompra != null) info.adpv = r.adpvCompra; }
+  }
+  return {porPesada, lotes};
+}
+// Peso estimado hoy de un animal del lote: último peso del lote + ganancia diaria por los días que pasaron.
+// Sin pesadas del lote se usa el promedio de las pesadas individuales; sin ninguna, el peso de compra.
+function kgEstimado(info){
+  const T = dayNum(hoy());
+  if (info.ult) return {kg: info.ult.kg + Math.max(0, info.adpv || 0) * Math.max(0, T - info.ult.dia), base:'pesada'};
+  if (info.animales.length){ const a = info.animales.reduce((s, x) => s + x, 0) / info.animales.length; return {kg: info.kg0 + Math.max(0, a) * Math.max(0, T - info.d0), base:'pesada'}; }
+  return {kg: info.kg0, base: info.kg0 ? 'compra' : 'sin'};
+}
+const fmtKgDia = v => v == null ? '—' : `${v >= 0 ? '+' : ''}${fmtN(v, 2)} kg/día`;
+
+const fPe = $('#fPesada'); let editPe = null, modoPe = 'lote';
+function setModoPesada(m){
+  modoPe = m;
+  fPe.querySelectorAll('[data-pmodo]').forEach(b => b.classList.toggle('on', b.dataset.pmodo === m));
+  fPe.querySelectorAll('.soloLote').forEach(e => e.hidden = m !== 'lote');
+  fPe.querySelectorAll('.soloAnimal').forEach(e => e.hidden = m !== 'animal');
+  $('#lblKgP').textContent = m === 'lote' ? 'Kilos totales de los pesados' : 'Kilos del animal';
+  pvPesada();
+}
+fPe.querySelectorAll('[data-pmodo]').forEach(b => b.onclick = () => setModoPesada(b.dataset.pmodo));
+document.querySelectorAll('[data-eng]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-eng]').forEach(x => x.classList.toggle('on', x === b));
+  $('#engGastos').hidden = b.dataset.eng !== 'gastos'; $('#engPesadas').hidden = b.dataset.eng !== 'pesadas';
+});
+function llenarLotesPesada(){
+  const prev = fPe.lote.value, actual = editPe ? (db.pesadas.find(p => p.id === editPe) || {}).compraId : null;
+  const ops = R.lots.filter(L => L.rest > 0 || L.c.id === actual).map(L =>
+    [L.c.id, `${fmtF(L.c.fecha)} · ${nombreLote(L.c)} · ${L.rest} en stock`]);
+  fPe.lote.innerHTML = ops.length ? ops.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join('') : '<option value="">No hay lotes en stock</option>';
+  if (ops.some(o => o[0] === prev)) fPe.lote.value = prev;
+}
+function leerPesada(){
+  const x = {fecha:fPe.fecha.value, tipo:modoPe, kg:num(fPe.kg.value), obs:fPe.obs.value.trim()};
+  if (modoPe === 'lote'){ x.compraId = fPe.lote.value; x.cantidad = Math.round(num(fPe.cantidad.value)); }
+  else { x.caravana = fPe.caravana.value.trim().toUpperCase(); x.cantidad = 1; const i = R.tagInfo.get(x.caravana); if (i) x.compraId = i.L.c.id; }
+  return x;
+}
+function validarPesada(x){
+  if (!x.fecha) return 'Falta la fecha.';
+  if (x.tipo === 'animal'){
+    if (!x.caravana) return 'Escribí la caravana.';
+    const i = R.tagInfo.get(x.caravana);
+    if (!i) return `La caravana ${esc(x.caravana)} no está en ningún lote de terneros.`;
+    if (i.L.c.fecha > x.fecha) return `Ese animal se compró el ${fmtF(i.L.c.fecha)}, después de la pesada.`;
+    if (i.asig && i.asig > x.fecha) return `La caravana se puso el ${fmtF(i.asig)}, después de la pesada.`;
+    if (i.venta && i.venta.fecha < x.fecha) return `Ese animal salió el ${fmtF(i.venta.fecha)}, antes de la pesada.`;
+  } else {
+    const L = R.lots.find(L => L.c.id === x.compraId);
+    if (!L) return 'Elegí el lote.';
+    if (L.c.fecha > x.fecha) return `Ese lote se compró el ${fmtF(L.c.fecha)}, después de la pesada.`;
+    if (!(x.cantidad > 0)) return 'Indicá cuántos animales se pesaron.';
+    if (x.cantidad > L.c.cantidad) return `El lote tiene ${L.c.cantidad} animales.`;
+  }
+  if (!(x.kg > 0)) return 'Faltan los kilos.';
+  const prom = x.kg / x.cantidad;
+  if (prom < 30 || prom > 1500) return `Da ${fmtN(prom, 1)} kg por animal: revisá los kilos${x.tipo === 'lote' ? ' (son los kilos totales de todos los pesados)' : ''}.`;
+  return null;
+}
+fPe.oninput = pvPesada; fPe.onchange = e => { if (e.target === fPe.lote && !editPe){ const L = R.lots.find(L => L.c.id === fPe.lote.value); if (L) fPe.cantidad.value = L.rest; } pvPesada(); };
+function pvPesada(){
+  const x = leerPesada(), box = $('#pvPesada');
+  if (!x.fecha || !(x.kg > 0) || !x.compraId || !(x.cantidad > 0)){ box.innerHTML = ''; return; }
+  const err = validarPesada(x); if (err){ box.innerHTML = `<span class="neg">${err}</span>`; return; }
+  const a = analisisPesos([...db.pesadas.filter(p => p.id !== editPe), {...x, id:'__draft', creado:Date.now()}]).porPesada.get('__draft');
+  box.innerHTML = a ? `Promedio <b>${fmtN(a.prom, 1)} kg</b> · desde la compra <b>${fmtKgDia(a.adpvCompra)}</b>${a.adpvPrev != null && a.desde !== a.info.d0 ? ` · desde la pesada anterior <b>${fmtKgDia(a.adpvPrev)}</b>` : ''}` : '';
+}
+fPe.onsubmit = e => {
+  e.preventDefault();
+  const x = leerPesada(), err = validarPesada(x); if (err) return avisar(err);
+  const prev = editPe ? db.pesadas.find(p => p.id === editPe) : null;
+  const item = {...x, id: prev ? prev.id : uid(), creado: prev ? prev.creado : Date.now()};
+  db = {...db, pesadas: prev ? db.pesadas.map(p => p.id === prev.id ? item : p) : [...db.pesadas, item]};
+  save(); cancelarPesada(); render();
+};
+function cancelarPesada(){
+  editPe = null; fPe.reset(); fPe.fecha.value = hoy(); $('#fPesadaTit').textContent = 'Nueva pesada'; $('#cancelPesada').hidden = true; fPe.classList.remove('editing');
+  llenarLotesPesada(); const L = R.lots.find(L => L.c.id === fPe.lote.value); if (L) fPe.cantidad.value = L.rest;
+  setModoPesada(modoPe);
+}
+$('#cancelPesada').onclick = cancelarPesada;
+function editarPesada(id){
+  const p = db.pesadas.find(x => x.id === id); editPe = id; setModoPesada(p.tipo); llenarLotesPesada();
+  fPe.fecha.value = p.fecha; fPe.kg.value = fmtN(p.kg, 1); fPe.obs.value = p.obs || '';
+  if (p.tipo === 'lote'){ fPe.lote.value = p.compraId; fPe.cantidad.value = p.cantidad; } else fPe.caravana.value = p.caravana;
+  $('#fPesadaTit').textContent = 'Editando pesada'; $('#cancelPesada').hidden = false; fPe.classList.add('editing'); pvPesada(); window.scrollTo(0, 0);
+}
+async function borrarPesada(id){
+  if (await ask('<h2>¿Borrar esta pesada?</h2>', [['si','Borrar','danger'], ['no','Cancelar']]) !== 'si') return;
+  db = {...db, pesadas: db.pesadas.filter(p => p.id !== id)}; save(); render();
+}
+
+/* ---------- precio de mercado ---------- */
+async function cargarPrecio(){
+  const ult = ultimoPrecio();
+  const r = await ask(`<h2>Precio de mercado</h2>
+    <p style="font-size:14px;margin-top:0">Precio de referencia del ternero o novillito en <b>$ por kilo</b> (último remate, Mercado de Cañuelas, Rosgan o tu consignataria). Se usa para estimar cuánto vale hoy el stock.</p>
+    <label>Fecha</label><input type="date" id="prFecha" value="${hoy()}">
+    <label style="margin-top:10px">Precio $/kg</label><input id="prValor" inputmode="decimal" placeholder="${ult ? fmtN(ult.precioKg, 0) : 'Ej: 3.500'}">
+    <label style="margin-top:10px">De dónde sale (opcional)</label><input id="prFuente" placeholder="Ej: Remate Rosgan, consignataria" value="${esc(ult ? ult.fuente || '' : '')}">`,
+    [['ok','Guardar','primary'], ['no','Cancelar']]);
+  if (r !== 'ok') return;
+  const fecha = $('#prFecha').value, precioKg = num($('#prValor').value), fuente = $('#prFuente').value.trim();
+  if (!fecha) return avisar('Falta la fecha.');
+  if (!(precioKg > 0)) return avisar('Falta el precio por kilo.');
+  db = {...db, precios: [...db.precios, {id:uid(), creado:Date.now(), fecha, precioKg, fuente}]}; save(); render();
+}
+const ultimoPrecio = () => [...(db.precios || [])].sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.creado || 0) - (b.creado || 0)).pop() || null;
+function verPrecios(){
+  const ps = [...db.precios].sort((a, b) => a.fecha < b.fecha ? 1 : -1);
+  ask(`<h2>Precios cargados</h2>${ps.map(p => `<div class="top" style="padding:6px 0;border-bottom:1px solid var(--line)">
+      <span>${fmtF(p.fecha)} · <b>${fmtM(p.precioKg)}/kg</b>${p.fuente ? `<br><span class="sub">${esc(p.fuente)}</span>` : ''}</span>
+      <button class="small danger" onclick="$('#dlg').close();borrarPrecio('${p.id}')">Borrar</button></div>`).join('')}
+    <p class="hint">Se usa siempre el más reciente.</p>`, [['ok','Cerrar','primary']]);
+}
+async function borrarPrecio(id){
+  if (await ask('<h2>¿Borrar este precio?</h2>', [['si','Borrar','danger'], ['no','Cancelar']]) !== 'si') return;
+  db = {...db, precios: db.precios.filter(p => p.id !== id)}; save(); render();
+}
+// Valor de mercado de cada lote en stock: animales × kilos estimados hoy × precio
+function valorStock(){
+  const pr = ultimoPrecio(), A = analisisPesos(db.pesadas), porLote = new Map();
+  for (const s of R.stock){
+    const info = A.lotes.get(s.L.c.id), est = kgEstimado(info);
+    porLote.set(s.L.c.id, {kg: est.kg, base: est.base, valor: pr ? s.L.rest * est.kg * pr.precioKg : null});
+  }
+  return {pr, porLote, total: pr ? [...porLote.values()].reduce((a, x) => a + x.valor, 0) : null};
+}
+
+/* Asignar caravanas a animales del lote que todavía no se vendieron */
+async function asignarCaravanas(id){
+  const c = db.compras.find(x => x.id === id), L = R.lots.find(L => L.c.id === id);
+  const r = await ask(`<h2>Asignar caravanas</h2>
+    <p style="font-size:14px;margin-top:0">Lote del ${fmtF(c.fecha)}: hoy quedan <b>${L.u}</b> animales sin caravana en stock. Solo se pueden asignar a animales que no se vendieron.</p>
+    <label>Fecha en que se pusieron</label><input type="date" id="asFecha" value="${hoy()}" min="${c.fecha}">
+    <label style="margin-top:10px">Caravanas</label><textarea id="asCar" placeholder="Ej: 3001-3010, 3015"></textarea>`,
+    [['ok','Asignar','primary'], ['no','Cancelar']]);
+  if (r !== 'ok') return;
+  const fecha = $('#asFecha').value, pc = parseCaravanas($('#asCar').value);
+  if (!fecha) return avisar('Falta la fecha.');
+  if (fecha < c.fecha) return avisar(`La fecha no puede ser anterior a la compra (${fmtF(c.fecha)}).`);
+  if (!pc.list.length) return avisar('No escribiste ninguna caravana.');
+  if (pc.errs.length) return avisar(`No entiendo estas caravanas: ${esc(pc.errs.join(', '))}`);
+  if (pc.dups.length) return avisar(`Estas caravanas están repetidas: ${esc(pc.dups.join(', '))}`);
+  const usadas = caravanasUsadas(null), rep = pc.list.find(t => usadas.has(t));
+  if (rep) return avisar(`La caravana ${esc(rep)} ya está en ${usadas.get(rep)}.`);
+  const a = {id:uid(), fecha, caravanas:pc.list, creado:Date.now()};
+  const nuevo = {...db, compras: db.compras.map(x => x.id === id ? {...x, asignaciones:[...(x.asignaciones || []), a]} : x)};
+  const t = probar(nuevo);
+  if (!t.ok) return avisar(t.msg + '<br><br>Las caravanas solo se pueden poner a animales que a esa fecha seguían en stock.');
+  db = nuevo; save(); render();
+  avisar(`Se asignaron <b>${pc.list.length}</b> caravanas al lote del ${fmtF(c.fecha)}.`);
+}
+async function quitarAsignacion(cid, aid){
+  const c = db.compras.find(x => x.id === cid), a = c.asignaciones.find(x => x.id === aid);
+  if (await ask(`<h2>¿Quitar estas caravanas?</h2><p style="font-size:14px">${esc(rangos(a.caravanas))} (asignadas el ${fmtF(a.fecha)}). Los animales vuelven a quedar sin caravana.</p>`,
+    [['si','Quitar','danger'], ['no','Cancelar']]) !== 'si') return;
+  const nuevo = {...db, compras: db.compras.map(x => x.id === cid ? {...x, asignaciones: x.asignaciones.filter(y => y.id !== aid)} : x)};
+  const t = probar(nuevo); if (!t.ok) return avisar(t.msg + '<br><br>Primero corregí la venta que usa esas caravanas.');
+  db = nuevo; save(); render();
+}
+
+/* Ventas */
+const fV = $('#fVenta'); let editV = null, salidaV = 'auto', tipoV = 'venta';
+function setTipoV(t){
+  tipoV = t;
+  fV.querySelectorAll('[data-tipov]').forEach(b => b.classList.toggle('on', b.dataset.tipov === t));
+  fV.querySelectorAll('.soloVenta').forEach(el => el.hidden = t === 'baja');
+  fV.querySelectorAll('.soloBaja').forEach(el => el.hidden = t !== 'baja');
+  const ed = !!editV;
+  $('#fVentaTit').textContent = t === 'baja' ? (ed ? 'Editando baja' : 'Nueva baja de stock') : (ed ? 'Editando venta' : 'Nueva venta (lote)');
+  $('#btnGuardarV').textContent = t === 'baja' ? 'Guardar baja' : 'Guardar venta';
+  pvVenta();
+}
+fV.querySelectorAll('[data-tipov]').forEach(b => b.onclick = () => setTipoV(b.dataset.tipov));
+function setSalida(m){
+  salidaV = m;
+  fV.querySelectorAll('[data-salida]').forEach(b => b.classList.toggle('on', b.dataset.salida === m));
+  $('#boxCarV').hidden = m !== 'car';
+  fV.cantidad.readOnly = m === 'car';
+  pvVenta();
+}
+fV.querySelectorAll('[data-salida]').forEach(b => b.onclick = () => setSalida(b.dataset.salida));
+fV.modo.onchange = () => { $('#lblPrecioV').textContent = fV.modo.value === 'kg' ? 'Precio por kilo $' : 'Precio total del lote $'; pvVenta(); };
+fV.oninput = pvVenta;
+function leerVenta(){
+  const x = leerLote(fV);
+  if (tipoV === 'baja'){ Object.assign(x, {baja:true, motivo:fV.motivo.value, kg:0, precio:0, gastos:0, modo:'total', tercero:''}); }
+  if (salidaV === 'car'){ const pc = parseCaravanas(fV.caravanas.value); x.caravanas = pc.list; x.cantidad = pc.list.length + Math.max(0, Math.round(num(fV.sinCar.value))); x._pc = pc; }
+  return x;
+}
+function pvVenta(){
+  if (salidaV === 'car'){ const n = parseCaravanas(fV.caravanas.value).list.length + Math.max(0, Math.round(num(fV.sinCar.value))); fV.cantidad.value = n || ''; }
+  const x = leerVenta(), box = $('#pvVenta');
+  if (x._pc && (x._pc.errs.length || x._pc.dups.length)){
+    box.innerHTML = `<div class="alert bad">${x._pc.errs.length ? `No entiendo: ${esc(x._pc.errs.join(', '))}. ` : ''}${x._pc.dups.length ? `Repetidas: ${esc(x._pc.dups.join(', '))}` : ''}</div>`; return;
+  }
+  delete x._pc;
+  if (!(x.cantidad > 0) || !x.fecha){
+    const d = x.dueno, de = d ? R.stock.filter(s => d === '__sin' ? !duenoDe(s.L.c) : duenoDe(s.L.c) === d).reduce((a, s) => a + s.L.rest, 0) : R.enStock;
+    box.innerHTML = `<div class="preview">Stock hoy${d ? ` de <b>${esc(nombreDueno(d === '__sin' ? '' : d))}</b>` : ''}: <b>${de}</b> terneros</div>`; return;
+  }
+  const draft = {...x, id:'__draft', creado: editV ? (db.ventas.find(v => v.id === editV)||{}).creado : Date.now()};
+  const r = calc({...db, ventas:[...db.ventas.filter(v => v.id !== editV), draft]});
+  const e = r.errores.find(e => e.v.id === '__draft') || r.errores[0];
+  if (e){ box.innerHTML = `<div class="alert bad">${e.v.id === '__draft' ? esc(e.msg)
+      : e.v.id === '__asig' ? `Esta venta se lleva animales a los que después se les asignaron caravanas. ${esc(e.msg)}`
+      : `Esta venta deja sin stock a la venta del ${fmtF(e.v.fecha)}: ${esc(e.msg)}`}</div>`; return; }
+  const s = r.ventasR.find(s => s.v.id === '__draft');
+  const tagsS = s.pieces.flatMap(p => p.tags), sinC = s.v.cantidad - tagsS.length;
+  box.innerHTML = `<div class="preview">Salen: ${s.pieces.map(p => `<b>${p.n}</b> del lote del ${fmtF(p.L.c.fecha)}`).join(', ')}</div>`
+    + (tagsS.length ? `<div class="preview">Caravanas: <b>${esc(rangos(tagsS))}</b>${sinC ? ` · <b>${sinC}</b> sin caravana` : ''}</div>` : '')
+    + (x.baja ? `<div class="preview">Pérdida: <b class="neg">${fmtM(-s.gan)}</b> (${fmtM(-s.ganU)} por animal, entre compra y engorde)</div>` : '')
+    + (x.precio > 0 ? `<div class="preview">Ganancia estimada por ternero: <b class="${signo(s.ganU)}">${fmtM(s.ganU)}</b> (${fmtP(s.pct)})`
+       + (s.realOk ? ` · ajustada por inflación <b class="${signo(s.ganRU)}">${fmtM(s.ganRU)}</b> (${fmtP(s.pctR)})` : '') + `</div>` : '');
+}
+fV.onsubmit = async e => {
+  e.preventDefault();
+  const x = leerVenta();
+  if (x._pc){
+    if (x._pc.errs.length) return avisar(`No entiendo estas caravanas: ${esc(x._pc.errs.join(', '))}`);
+    if (x._pc.dups.length) return avisar(`Estas caravanas están repetidas: ${esc(x._pc.dups.join(', '))}`);
+    if (!x.caravanas.length) return avisar('Escribí las caravanas que salen.');
+    delete x._pc;
+  }
+  const err = validarLote(x); if (err) return avisar(err);
+  const prev = editV ? db.ventas.find(v => v.id === editV) : null;
+  const item = {...x, id: editV || uid(), creado: prev ? prev.creado : Date.now()};
+  const nuevo = {...db, ventas: editV ? db.ventas.map(v => v.id === editV ? item : v) : [...db.ventas, item]};
+  let t = probar(nuevo); if (!t.ok) return avisar(t.msg);
+  if (salidaV === 'auto'){
+    // si salen animales con caravana, la persona confirma cuáles son
+    const s0 = t.r.ventasR.find(s => s.v.id === item.id), tags = s0.pieces.flatMap(p => p.tags);
+    if (tags.length){
+      const sinC = item.cantidad - tags.length;
+      const r = await ask(`<h2>¿Salen estas caravanas?</h2>
+        ${s0.pieces.filter(p => p.tags.length).map(p => `<p style="font-size:14px;margin:6px 0">Lote del ${fmtF(p.L.c.fecha)}: <b>${esc(rangos(p.tags))}</b></p>`).join('')}
+        ${sinC ? `<p style="font-size:14px;margin:6px 0">Y <b>${sinC}</b> terneros sin caravana.</p>` : ''}
+        <p style="font-size:14px;color:var(--muted)">Si no son esas, elegí las que realmente salen.</p>`,
+        [['si','Sí, son esas','primary'], ['otras','Elegir otras caravanas'], ['no','Cancelar']]);
+      if (r === 'otras'){
+        setSalida('car'); fV.caravanas.value = rangos(tags); fV.sinCar.value = sinC || ''; pvVenta();
+        fV.caravanas.focus(); return;
+      }
+      if (r !== 'si') return;
+      item.caravanas = tags; item.auto = true;          // quedan fijas: si después se carga algo con fecha anterior, no cambian
+      t = probar(nuevo); if (!t.ok) return avisar(t.msg);
+    }
+  } else delete item.auto;
+  db = nuevo; save(); cancelar('V'); render();
+  const s = t.r.ventasR.find(s => s.v.id === item.id);
+  avisar(`<h2>${item.baja ? `Baja guardada (${esc(item.motivo)})` : 'Venta guardada'}</h2>${bloqueResultado(s)}`);
+};
+$('#cancelVenta').onclick = () => cancelar('V');
+
+/* Gastos */
+const fG = $('#fGasto'); let editG = null, tipoG = 'mensual';
+function setTipo(t){
+  tipoG = t;
+  fG.querySelectorAll('[data-tipo]').forEach(b => b.classList.toggle('on', b.dataset.tipo === t));
+  $('#boxMes').hidden = t !== 'mensual';
+  $('#boxDias1').hidden = $('#boxDias2').hidden = t !== 'dias';
+  $('#boxAnio1').hidden = $('#boxAnio2').hidden = t !== 'anual';
+  fG.oninput();
+}
+fG.querySelectorAll('[data-tipo]').forEach(b => b.onclick = () => setTipo(b.dataset.tipo));
+const camposG = ['maizTn','maizCosto','campoHa','campoCosto','veterinaria','empleado'];
+function leerGasto(){
+  const g = {tipo:tipoG, obs:fG.obs.value.trim()};
+  if (tipoG === 'mensual') g.periodo = fG.mes.value;
+  if (tipoG === 'dias'){ g.periodo = fG.desde.value; g.dias = Math.round(num(fG.dias.value)); }
+  if (tipoG === 'anual'){ g.periodo = String(Math.round(num(fG.anio.value))); g.anios = Math.max(1, Math.round(num(fG.anios.value)) || 1); }
+  camposG.forEach(k => g[k] = num(fG[k].value)); return g;
+}
+function errorPeriodo(g){
+  if (g.tipo === 'mensual' && !/^\d{4}-\d{2}$/.test(g.periodo)) return 'Elegí el mes.';
+  if (g.tipo === 'dias' && !/^\d{4}-\d{2}-\d{2}$/.test(g.periodo)) return 'Elegí la fecha desde la que corre el gasto.';
+  if (g.tipo === 'dias' && !(g.dias > 0)) return 'Escribí la cantidad de días.';
+  if (g.tipo === 'anual' && !(+g.periodo > 1990 && +g.periodo < 2200)) return 'Escribí el año (por ejemplo 2026).';
+  if (g.tipo === 'anual' && g.anios > 50) return 'La cantidad de años parece muy grande.';
+  return null;
+}
+fG.oninput = () => {
+  const g = leerGasto(), t = gastoTotal(g);
+  if (!errorPeriodo(g)){
+    const p = periodoDias(g), len = p.end - p.start;
+    $('#pvPeriodo').innerHTML = `Del <b>${fmtF(diaAFecha(p.start))}</b> al <b>${fmtF(diaAFecha(p.end - 1))}</b> · ${fmtN(len)} días`;
+    $('#pvGasto').innerHTML = t ? `Total <b>${fmtM(t)}</b> · <b>${fmtM(t / len)}</b> por día · <b>${fmtM(t / len * 30.4)}</b> por mes` : '';
+  } else { $('#pvPeriodo').innerHTML = ''; $('#pvGasto').innerHTML = t ? `Total <b>${fmtM(t)}</b>` : ''; }
+};
+fG.onsubmit = async e => {
+  e.preventDefault();
+  const g = leerGasto(), errP = errorPeriodo(g); if (errP) return avisar(errP);
+  if (!camposG.some(k => g[k] > 0)) return avisar('Cargá al menos un dato.');
+  const p = periodoDias(g);
+  const mismo = x => x.tipo === g.tipo && x.periodo === g.periodo && (x.dias || 0) === (g.dias || 0) && (x.anios || 1) === (g.anios || 1);
+  const otros = db.gastos.filter(x => x.id !== editG);
+  const dup = otros.find(mismo);
+  if (dup){
+    const r = await ask(`<h2>Ya hay una carga para ${periodoTxt(g)}</h2>
+      <p style="font-size:14px">Cargado: ${fmtM(gastoTotal(dup))}${dup.maizTn ? ` · ${fmtN(dup.maizTn,2)} tn de maíz` : ''}.</p>
+      <p style="font-size:14px">¿Querés agregar esta como una carga nueva (se suman) o corregir la que ya está?</p>`,
+      [['nueva','Agregar como carga nueva','primary'], ['editar','Editar la existente'], ['no','Cancelar']]);
+    if (r === 'editar'){ editarGasto(dup.id); return; }
+    if (r !== 'nueva') return;
+  } else {
+    const cruces = otros.filter(x => { const q = periodoDias(x); return q.start < p.end && p.start < q.end; });
+    if (cruces.length){
+      const r = await ask(`<h2>Se superpone con otras cargas</h2>
+        <p style="font-size:14px">Este período coincide en parte con:</p>
+        <ul style="font-size:14px;padding-left:18px;margin:6px 0">${cruces.slice(0, 5).map(x => `<li>${periodoTxt(x)}: ${fmtM(gastoTotal(x))}</li>`).join('')}${cruces.length > 5 ? `<li>y ${cruces.length - 5} más</li>` : ''}</ul>
+        <p style="font-size:14px">Los montos se suman. ¿Seguro que no es el mismo gasto cargado dos veces?</p>`,
+        [['si','Sí, guardar','primary'], ['no','Cancelar']]);
+      if (r !== 'si') return;
+    }
+  }
+  const prev = editG ? db.gastos.find(x => x.id === editG) : null;
+  const item = {...g, id: editG || uid(), creado: prev ? prev.creado : Date.now()};
+  db = {...db, gastos: editG ? db.gastos.map(x => x.id === editG ? item : x) : [...db.gastos, item]};
+  save(); cancelar('G'); render();
+};
+$('#cancelGasto').onclick = () => cancelar('G');
+
+function cancelar(k){
+  if (k === 'C'){ editC = null; limpiar(fC); fC.cantidad.dataset.auto = ''; fC.modo.onchange(); $('#fCompraTit').textContent = 'Nueva compra (lote)'; $('#cancelCompra').hidden = true; fC.classList.remove('editing'); }
+  if (k === 'V'){ editV = null; limpiar(fV); fV.modo.onchange(); setSalida('auto'); setTipoV('venta'); $('#cancelVenta').hidden = true; fV.classList.remove('editing'); }
+  if (k === 'G'){ editG = null; fG.reset(); fG.mes.value = hoy().slice(0, 7); fG.desde.value = hoy(); fG.anio.value = hoy().slice(0, 4); fG.anios.value = '1'; setTipo(tipoG); $('#pvGasto').innerHTML = ''; $('#fGastoTit').textContent = 'Carga de gastos de engorde'; $('#cancelGasto').hidden = true; fG.classList.remove('editing'); }
+}
+function editarCompra(id){ const c = db.compras.find(x => x.id === id); editC = id; llenarLote(fC, c); fC.cantidad.dataset.auto = ''; fC.caravanas.value = rangos(c.caravanas); fC.modo.onchange(); $('#fCompraTit').textContent = 'Editando compra'; $('#cancelCompra').hidden = false; fC.classList.add('editing'); window.scrollTo(0, 0); }
+function editarVenta(id){ const v = db.ventas.find(x => x.id === id); editV = id; llenarLote(fV, v); fV.modo.onchange();
+  const porCar = !v.auto && v.caravanas && v.caravanas.length;   // las automáticas confirmadas se vuelven a proponer
+  fV.caravanas.value = porCar ? rangos(v.caravanas) : ''; fV.sinCar.value = porCar && v.cantidad > v.caravanas.length ? v.cantidad - v.caravanas.length : '';
+  setSalida(porCar ? 'car' : 'auto'); if (v.baja) fV.motivo.value = v.motivo || 'Otro'; setTipoV(v.baja ? 'baja' : 'venta'); $('#cancelVenta').hidden = false; fV.classList.add('editing'); window.scrollTo(0, 0); }
+function editarGasto(id){
+  const g = db.gastos.find(x => x.id === id); editG = id;
+  if (g.tipo === 'mensual') fG.mes.value = g.periodo;
+  if (g.tipo === 'dias'){ fG.desde.value = g.periodo; fG.dias.value = g.dias; }
+  if (g.tipo === 'anual'){ fG.anio.value = g.periodo; fG.anios.value = g.anios || 1; }
+  camposG.forEach(k => fG[k].value = g[k] ? fmtN(g[k], 2) : ''); fG.obs.value = g.obs || ''; setTipo(g.tipo);
+  $('#fGastoTit').textContent = `Editando ${periodoTxt(g)}`; $('#cancelGasto').hidden = false; fG.classList.add('editing'); window.scrollTo(0, 0);
+}
+async function borrar(tipo, id){
+  const nombres = {compras:'esta compra', ventas:'esta venta', gastos:'esta carga de gastos'};
+  if (await ask(`<h2>¿Borrar ${nombres[tipo]}?</h2><p style="font-size:14px">No se puede deshacer.</p>`, [['si','Borrar','danger'], ['no','Cancelar']]) !== 'si') return;
+  const nuevo = {...db, [tipo]: db[tipo].filter(x => x.id !== id)};
+  if (tipo === 'compras'){ const t = probar(nuevo); if (!t.ok) return avisar(t.msg + '<br><br>Primero borrá o corregí esa venta.'); }
+  db = nuevo; save(); render();
+}
+
+/* ---------- resumen por dueño ---------- */
+// Junta, por persona (y "Campo" para la cría propia): lo comprado, lo vendido y su ganancia, las bajas y lo que tiene hoy.
+// En una venta "General" con terneros de varios dueños, lo cobrado se reparte por cabeza.
+function porDueno(){
+  const m = new Map(), get = id => {
+    if (!m.has(id)) m.set(id, {compradosN:0, invertido:0, vendidosN:0, cobrado:0, costoVend:0, engVend:0, bajasN:0, perdBajas:0, ganancia:0,
+                               stock:0, invStock:0, valor:0, hayValor:false, lotes:[], ventas:[]});
+    return m.get(id);
+  };
+  // orden: personas por nombre, después el campo, al final "sin asignar"
+  [...(db.personas || [])].sort((a, b) => a.nombre.localeCompare(b.nombre)).forEach(p => get(p.id));
+  // en un lote compartido, cada persona se lleva su % de todo (animales, plata, ganancia)
+  for (const c of db.compras) for (const [id, f] of partesDe(c)){ const d = get(id); d.compradosN += c.cantidad * f; d.invertido += costoCompra(c) * f; d.lotes.push([c, f]); }
+  for (const s of R.ventasR) for (const p of s.pieces) for (const [id, f] of partesDe(p.L.c)){
+    const d = get(id), cobro = s.neto * p.n / s.v.cantidad * f, costo = p.costo * f, eng = p.eng * f, gan = cobro - costo - eng;
+    if (s.v.baja){ d.bajasN += p.n * f; d.perdBajas -= gan; }
+    else { d.vendidosN += p.n * f; d.cobrado += cobro; d.costoVend += costo; d.engVend += eng; }
+    d.ganancia += gan; d.ventas.push({s, p, f, cobro, gan});
+  }
+  const VS = valorStock();
+  for (const x of R.stock) for (const [id, f] of partesDe(x.L.c)){
+    const d = get(id), v = VS.porLote.get(x.L.c.id);
+    d.stock += x.L.rest * f; d.invStock += (x.L.unit * x.L.rest + x.engorde) * f;
+    if (v && v.valor != null){ d.valor += v.valor * f; d.hayValor = true; }
+  }
+  // orden final: personas, después el campo, y "sin asignar" solo si tiene compras
+  const orden = new Map();
+  for (const [k, v] of m) if (k && k !== CAMPO_ID) orden.set(k, v);
+  if (m.has(CAMPO_ID)) orden.set(CAMPO_ID, m.get(CAMPO_ID));
+  if (m.has('') && m.get('').compradosN) orden.set('', m.get(''));
+  return orden;
+}
+const fmtCab = n => fmtN(n, Number.isInteger(Math.round(n * 10) / 10) ? 0 : 1);   // en lotes compartidos puede haber medias cabezas
+function tarjetaDueno(id, d){
+  const base = d.costoVend + d.engVend + d.ventas.filter(x => x.s.v.baja).reduce((a, x) => a + (x.p.costo + x.p.eng) * x.f, 0);
+  return `<div class="card item"><div class="top"><span class="title">${esc(nombreDueno(id))}</span><span class="sub">${fmtCab(d.stock)} en stock</span></div>
+    <div class="rows">
+      <span>${id === CAMPO_ID ? 'Pasados desde cría' : 'Comprados'}</span><span class="r">${fmtCab(d.compradosN)}${id === CAMPO_ID && !d.invertido ? '' : ` · ${fmtM(d.invertido)}`}</span>
+      <span>Vendidos</span><span class="r">${fmtCab(d.vendidosN)} · cobrado ${fmtM(d.cobrado)}</span>
+      ${d.bajasN ? `<span>Bajas (muerte, etc.)</span><span class="r neg">${fmtCab(d.bajasN)} · −${fmtM(d.perdBajas)}</span>` : ''}
+      <span>Ganancia realizada</span><span class="r ${signo(d.ganancia)}"><b>${fmtM(d.ganancia)}</b>${base ? ` (${fmtP(d.ganancia / base)})` : ''}</span>
+      <span>Invertido en su stock hoy</span><span class="r">${fmtM(d.invStock)}</span>
+      ${d.hayValor ? `<span>Valor de su stock a mercado</span><span class="r">${fmtM(d.valor)}</span>
+        <span>Ganancia sin realizar</span><span class="r ${signo(d.valor - d.invStock)}">${fmtM(d.valor - d.invStock)}</span>` : ''}
+    </div>
+    ${id ? `<div class="btns"><button class="small primary" onclick="informePersona('${id}')">Informe para compartir</button></div>` : ''}</div>`;
+}
+
+/* ---------- informe por persona (para compartir) ---------- */
+function datosInforme(id){
+  const d = porDueno().get(id); if (!d) return null;
+  const nombre = nombreDueno(id), base = d.costoVend + d.engVend + d.ventas.filter(x => x.s.v.baja).reduce((a, x) => a + (x.p.costo + x.p.eng) * x.f, 0);
+  const lotes = d.lotes.map(([c, f]) => { const L = R.lots.find(L => L.c.id === c.id);
+    return {fecha:c.fecha, cab:c.cantidad * f, pct:f, total:c.cantidad, costo:costoCompra(c) * f, quedan:(L ? L.rest : 0) * f, origen:c.origen}; })
+    .sort((a, b) => a.fecha < b.fecha ? -1 : 1);
+  const porVenta = new Map();
+  for (const x of d.ventas){
+    const k = x.s.v.id; if (!porVenta.has(k)) porVenta.set(k, {fecha:x.s.v.fecha, baja:x.s.v.baja, motivo:x.s.v.motivo, cab:0, cobro:0, gan:0});
+    const o = porVenta.get(k); o.cab += x.p.n * x.f; o.cobro += x.cobro; o.gan += x.gan;
+  }
+  return {nombre, d, base, lotes, ventas:[...porVenta.values()].sort((a, b) => a.fecha < b.fecha ? -1 : 1)};
+}
+function textoInforme(I){
+  const d = I.d, L = [];
+  L.push(`*Informe de terneros: ${I.nombre}*`, `Al ${fmtF(hoy())}`, '');
+  L.push(`Comprados: ${fmtCab(d.compradosN)} terneros · ${fmtM(d.invertido)}`);
+  L.push(`Vendidos: ${fmtCab(d.vendidosN)} · cobrado ${fmtM(d.cobrado)}`);
+  if (d.bajasN) L.push(`Bajas (muerte, etc.): ${fmtCab(d.bajasN)} · pérdida ${fmtM(d.perdBajas)}`);
+  L.push(`*Ganancia realizada: ${fmtM(d.ganancia)}*${I.base ? ` (${fmtP(d.ganancia / I.base)})` : ''}`);
+  L.push(`En stock: ${fmtCab(d.stock)} terneros · invertido ${fmtM(d.invStock)}`);
+  if (d.hayValor) L.push(`Valor del stock a mercado: ${fmtM(d.valor)} (ganancia sin realizar ${fmtM(d.valor - d.invStock)})`);
+  if (I.lotes.length){ L.push('', '*Lotes*'); I.lotes.forEach(l => L.push(`• ${fmtF(l.fecha)}: ${fmtCab(l.cab)} terneros${l.pct < 1 ? ` (de un lote compartido de ${l.total})` : ''} · ${l.origen === 'cria' ? 'cría propia' : 'costo ' + fmtM(l.costo)} · quedan ${fmtCab(l.quedan)}`)); }
+  if (I.ventas.length){ L.push('', '*Ventas y bajas*'); I.ventas.forEach(v => L.push(`• ${fmtF(v.fecha)}: ${fmtCab(v.cab)} terneros · ${v.baja ? `baja (${v.motivo || 'otro'})` : 'cobrado ' + fmtM(v.cobro)} · ${v.gan >= 0 ? 'ganancia' : 'pérdida'} ${fmtM(Math.abs(v.gan))}`)); }
+  return L.join('\n');
+}
+function htmlInforme(I){
+  const d = I.d, fila = (a, b, cls) => `<tr><td>${a}</td><td class="r ${cls || ''}">${b}</td></tr>`;
+  return `<h2 style="margin:0 0 2px">Informe: ${esc(I.nombre)}</h2><div class="sub" style="margin-bottom:10px">Al ${fmtF(hoy())}</div>
+    <table class="inf">${fila('Comprados', `${fmtCab(d.compradosN)} · ${fmtM(d.invertido)}`)}${fila('Vendidos', `${fmtCab(d.vendidosN)} · cobrado ${fmtM(d.cobrado)}`)}
+      ${d.bajasN ? fila('Bajas', `${fmtCab(d.bajasN)} · −${fmtM(d.perdBajas)}`, 'neg') : ''}
+      ${fila('<b>Ganancia realizada</b>', `<b>${fmtM(d.ganancia)}</b>${I.base ? ` (${fmtP(d.ganancia / I.base)})` : ''}`, signo(d.ganancia))}
+      ${fila('En stock', `${fmtCab(d.stock)} · invertido ${fmtM(d.invStock)}`)}
+      ${d.hayValor ? fila('Valor a mercado', `${fmtM(d.valor)} (sin realizar ${fmtM(d.valor - d.invStock)})`) : ''}</table>
+    ${I.lotes.length ? `<h3>Lotes</h3><table class="inf"><tr><th>Fecha</th><th class="r">Terneros</th><th class="r">Costo</th><th class="r">Quedan</th></tr>
+      ${I.lotes.map(l => `<tr><td>${fmtF(l.fecha)}</td><td class="r">${fmtCab(l.cab)}${l.pct < 1 ? ` de ${l.total}` : ''}</td><td class="r">${l.origen === 'cria' ? 'cría' : fmtM(l.costo)}</td><td class="r">${fmtCab(l.quedan)}</td></tr>`).join('')}</table>` : ''}
+    ${I.ventas.length ? `<h3>Ventas y bajas</h3><table class="inf"><tr><th>Fecha</th><th class="r">Terneros</th><th class="r">Cobrado</th><th class="r">Ganancia</th></tr>
+      ${I.ventas.map(v => `<tr><td>${fmtF(v.fecha)}${v.baja ? ' (baja)' : ''}</td><td class="r">${fmtCab(v.cab)}</td><td class="r">${v.baja ? '—' : fmtM(v.cobro)}</td><td class="r ${signo(v.gan)}">${fmtM(v.gan)}</td></tr>`).join('')}</table>` : ''}`;
+}
+async function informePersona(id){
+  const I = datosInforme(id); if (!I) return;
+  const txt = textoInforme(I);
+  const r = await ask(`<div class="informe">${htmlInforme(I)}</div>`,
+    [['compartir','Compartir (WhatsApp, mail…)','primary'], ['imprimir','Imprimir o guardar PDF'], ['copiar','Copiar texto'], ['no','Cerrar']]);
+  if (r === 'compartir'){
+    if (navigator.share){ try { await navigator.share({title:`Informe ${I.nombre}`, text:txt}); return; } catch(e){ if (e.name === 'AbortError') return; } }
+    window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+  }
+  if (r === 'copiar') copiarTexto(txt);
+  if (r === 'imprimir'){
+    const w = window.open('', '_blank');
+    if (!w) return avisar('El navegador bloqueó la ventana. Usá "Copiar texto" o "Compartir".');
+    w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>Informe ${esc(I.nombre)}</title><style>body{font:14px/1.4 system-ui,sans-serif;color:#1f2a22;max-width:720px;margin:24px auto;padding:0 16px}
+      h3{margin:18px 0 6px}table{width:100%;border-collapse:collapse}td,th{padding:6px 4px;border-bottom:1px solid #ddd;text-align:left}
+      .r{text-align:right}.pos{color:#1f7a3a}.neg{color:#b3261e}.sub{color:#666}</style></head><body>${htmlInforme(I)}
+      <p class="sub" style="margin-top:20px">Hecho con la app Terneros.</p><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.close();
+  }
+}
+
+/* ---------- buscar animal / leer chip ---------- */
+// El lector de chips (bastón) conectado por Bluetooth en modo teclado "escribe" el número y aprieta Enter.
+// El número del chip se vincula a la caravana visual; los animales sin chip se buscan por la caravana.
+const normId = s => String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+const fichaDe = t => (db.fichas || []).find(f => f.caravana === t);
+function guardarFicha(t, cambios){
+  const prev = fichaDe(t);
+  const item = {...(prev || {id:uid(), creado:Date.now(), caravana:t}), ...cambios};
+  db = {...db, fichas: prev ? db.fichas.map(f => f.caravana === t ? item : f) : [...(db.fichas || []), item]};
+  save(); render();
+}
+function chipOcupado(chip, t){
+  const otra = (db.fichas || []).find(f => f.chip === chip && f.caravana !== t);
+  if (otra) return `Ese chip ya está vinculado a la caravana ${esc(otra.caravana)}.`;
+  if (R.tagInfo.has(chip) && chip !== t) return 'Ese número es la caravana de otro animal.';
+  return null;
+}
+async function abrirBuscador(){
+  const p = ask(`<h2>Buscar animal</h2>
+    <p style="font-size:14px;margin-top:0">Pasá el lector por el chip o escribí la caravana.</p>
+    <input id="bqIn" autocomplete="off" placeholder="Chip o caravana" style="font-size:20px">`,
+    [['ok','Buscar','primary'], ['no','Cerrar']]);
+  const inp = $('#bqIn'); setTimeout(() => inp.focus(), 60);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('#dlgBtns button').click(); } });
+  if (await p !== 'ok') return;
+  const v = normId(inp.value); if (v) await buscarAnimal(v);
+}
+async function buscarAnimal(v){
+  const porChip = (db.fichas || []).find(f => f.chip === v);
+  if (porChip) return fichaAnimal(porChip.caravana);
+  if (R.tagInfo.has(v)) return fichaAnimal(v);
+  if (VR.S.vacas.tags.has(v) || VR.S.crias.tags.has(v))
+    return avisar(`La caravana <b>${esc(v)}</b> está en el stock de ${VR.S.vacas.tags.has(v) ? 'vacas' : 'crías'}. La ficha individual por ahora es solo para terneros.`);
+  // número desconocido: puede ser un chip nuevo → se vincula a la caravana del animal
+  const r = await ask(`<h2>No conozco este número</h2><p style="font-size:16px;margin:4px 0"><b>${esc(v)}</b></p>
+    <p style="font-size:14px">Si es el chip de un ternero, escribí su caravana para vincularlos. Desde ahí, al leer el chip se abre su ficha.</p>
+    <label>Caravana del animal</label><input id="vinCar" autocomplete="off">`, [['ok','Vincular chip','primary'], ['no','Cancelar']]);
+  if (r !== 'ok') return;
+  const t = normId($('#vinCar').value);
+  if (!R.tagInfo.has(t)) return avisar(`La caravana ${esc(t || '(vacía)')} no está en ningún lote de terneros. Si el animal todavía no tiene caravana, asignásela desde Compras → Asignar caravanas.`);
+  const err = chipOcupado(v, t); if (err) return avisar(err);
+  guardarFicha(t, {chip:v}); return fichaAnimal(t);
+}
+async function fichaAnimal(t){
+  const i = R.tagInfo.get(t); if (!i) return avisar('No encontré ese animal.');
+  const L = i.L, c = L.c, f = fichaDe(t) || {}, T = dayNum(hoy()), v = i.venta;
+  const dias = (v ? dayNum(v.fecha) : T) - Math.max(L.day, 0);
+  // costo de este animal: compra + su parte del engorde
+  let eng = 0, s = null;
+  if (v){ s = R.ventasR.find(x => x.v.id === v.id); const p = s && s.pieces.find(p => p.L === L); if (p) eng = p.eng / p.n; }
+  else { const st = R.stock.find(x => x.L === L); if (st) eng = st.engU; }
+  // pesadas: las del animal y las de su lote
+  const A = analisisPesos(db.pesadas), info = A.lotes.get(c.id);
+  const propias = db.pesadas.filter(p => p.tipo === 'animal' && p.caravana === t).sort((a, b) => a.fecha < b.fecha ? -1 : 1);
+  const ultP = propias[propias.length - 1], ultA = ultP ? A.porPesada.get(ultP.id) : null;
+  let est = null;
+  if (!v){
+    if (ultA) est = ultA.prom + Math.max(0, ultA.adpvCompra || 0) * Math.max(0, T - dayNum(ultP.fecha));
+    else { const e = kgEstimado(info); if (e.kg) est = e.kg; }
+  }
+  const estado = !v ? `<span class="pos"><b>En stock</b></span> · ${dias} días en el campo`
+    : v.baja ? `<span class="neg"><b>Baja</b> el ${fmtF(v.fecha)} (${esc(v.motivo || 'Otro')})</span>`
+    : `<b>Vendido</b> el ${fmtF(v.fecha)}${v.tercero ? ' a ' + esc(v.tercero) : ''} · ${dias} días en el campo`;
+  const cobro = s && !v.baja ? s.neto / s.v.cantidad : 0;
+  const html = `<div class="ficha"><h2 style="margin:0">Caravana ${esc(t)}</h2>
+    <div class="sub" style="margin-bottom:8px">${f.chip ? `Chip: <b>${esc(f.chip)}</b>` : 'Sin chip vinculado'}</div>
+    <div style="margin-bottom:8px">${estado}</div>
+    <div class="rows">
+      <span>Lote</span><span class="r">${fmtF(c.fecha)}${c.origen === 'cria' ? ' (cría propia)' : ''}</span>
+      <span>De</span><span class="r">${esc(nombreLote(c))}</span>
+      ${i.asig ? `<span>Caravana puesta</span><span class="r">${fmtF(i.asig)}</span>` : ''}
+      <span>Peso de compra (prom. lote)</span><span class="r">${L.kgU ? fmtN(L.kgU, 1) + ' kg' : '—'}</span>
+      ${est ? `<span>Peso estimado hoy</span><span class="r"><b>${fmtN(est, 0)} kg</b></span>` : ''}
+      <span>Costo de compra</span><span class="r">${fmtM(L.unit)}</span>
+      <span>Engorde${v ? '' : ' hasta hoy'}</span><span class="r">${fmtM(eng)}</span>
+      <span><b>Costo total</b></span><span class="r"><b>${fmtM(L.unit + eng)}</b></span>
+      ${cobro ? `<span>Cobrado (prom. de la venta)</span><span class="r">${fmtM(cobro)}</span>
+        <span><b>Ganancia</b></span><span class="r ${signo(cobro - L.unit - eng)}"><b>${fmtM(cobro - L.unit - eng)}</b></span>` : ''}
+    </div>
+    ${propias.length ? `<h3>Pesadas de este animal</h3><div class="rows">${propias.map(p => { const a = A.porPesada.get(p.id);
+        return `<span>${fmtF(p.fecha)}: ${fmtN(p.kg, 1)} kg</span><span class="r">${a ? fmtKgDia(a.adpvCompra) : ''}</span>`; }).join('')}</div>` : ''}
+    ${info && info.ult ? `<div class="sub">Última pesada del lote: ${fmtF(diaAFecha(info.ult.dia))}, ${fmtN(info.ult.kg, 1)} kg prom. (${fmtKgDia(info.adpv)})</div>` : ''}
+    ${f.obs ? `<h3>Notas</h3><div style="white-space:pre-wrap;font-size:14px">${esc(f.obs)}</div>` : ''}</div>`;
+  const acciones = v ? [] : [['pesada','Registrar pesada','primary'], ['vender','Vender'], ['baja','Dar de baja (muerte, etc.)']];
+  const r = await ask(html, [...acciones, ['chip', f.chip ? 'Cambiar chip' : 'Vincular chip'], ['nota', f.obs ? 'Editar notas' : 'Agregar nota'], ['no','Cerrar']]);
+  if (r === 'pesada') return pesadaDesdeFicha(t, c);
+  if (r === 'vender'){ irA('ventas'); cancelar('V'); setSalida('car'); fV.caravanas.value = t; pvVenta(); fV.kg.focus(); return; }
+  if (r === 'baja') return bajaDesdeFicha(t);
+  if (r === 'chip'){
+    const q = await ask(`<h2>Chip de la caravana ${esc(t)}</h2><p style="font-size:14px;margin-top:0">Pasá el lector o escribí el número. Dejalo vacío para quitar el chip.</p>
+      <input id="chIn" autocomplete="off" value="${esc(f.chip || '')}" style="font-size:18px">`, [['ok','Guardar','primary'], ['no','Cancelar']]);
+    if (q === 'ok'){ const ch = normId($('#chIn').value); const err = ch ? chipOcupado(ch, t) : null; if (err) return avisar(err); guardarFicha(t, {chip:ch}); }
+    return fichaAnimal(t);
+  }
+  if (r === 'nota'){
+    const q = await ask(`<h2>Notas de ${esc(t)}</h2><textarea id="ntIn" style="min-height:120px">${esc(f.obs || '')}</textarea>`, [['ok','Guardar','primary'], ['no','Cancelar']]);
+    if (q === 'ok') guardarFicha(t, {obs:$('#ntIn').value.trim()});
+    return fichaAnimal(t);
+  }
+}
+async function pesadaDesdeFicha(t, c){
+  const q = await ask(`<h2>Pesada de ${esc(t)}</h2>
+    <label>Fecha</label><input type="date" id="pfF" value="${hoy()}">
+    <label style="margin-top:10px">Kilos</label><input id="pfK" inputmode="decimal" style="font-size:18px">`, [['ok','Guardar','primary'], ['no','Cancelar']]);
+  if (q !== 'ok') return fichaAnimal(t);
+  const x = {fecha:$('#pfF').value, tipo:'animal', caravana:t, cantidad:1, kg:num($('#pfK').value), compraId:c.id, obs:''};
+  const err = validarPesada(x); if (err){ await avisar(err); return fichaAnimal(t); }
+  db = {...db, pesadas:[...db.pesadas, {...x, id:uid(), creado:Date.now()}]}; save(); render();
+  return fichaAnimal(t);
+}
+async function bajaDesdeFicha(t){
+  const q = await ask(`<h2>Dar de baja ${esc(t)}</h2>
+    <label>Fecha</label><input type="date" id="bfF" value="${hoy()}">
+    <label style="margin-top:10px">Motivo</label><select id="bfM"><option>Muerte</option><option>Robo / pérdida</option><option>Consumo propio</option><option>Otro</option></select>
+    <label style="margin-top:10px">Observaciones</label><input id="bfO">`, [['ok','Dar de baja','danger'], ['no','Cancelar']]);
+  if (q !== 'ok') return fichaAnimal(t);
+  const item = {id:uid(), creado:Date.now(), fecha:$('#bfF').value, cantidad:1, kg:0, modo:'total', precio:0, gastos:0, tercero:'',
+                obs:$('#bfO').value.trim(), baja:true, motivo:$('#bfM').value, caravanas:[t]};
+  const nuevo = {...db, ventas:[...db.ventas, item]}, r = probar(nuevo);
+  if (!r.ok) return avisar(r.msg);
+  db = nuevo; save(); render();
+  avisar(`<h2>Baja guardada (${esc(item.motivo)})</h2>${bloqueResultado(r.r.ventasR.find(s => s.v.id === item.id))}`);
+}
+
+/* ---------- listas ---------- */
+function render(){
+  R = calc(db);
+  vRender(); actualizarBadge(); llenarDuenos();
+  const AP = analisisPesos(db.pesadas), VS = valorStock(), PD = porDueno();
+
+  // personas
+  const ps = [...(db.personas || [])].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  $('#listPersonas').innerHTML = (ps.length ? ps.map(p => { const d = PD.get(p.id) || {};
+    return `<div class="card item"><div class="top"><span class="title">${esc(p.nombre)}</span><span class="sub">${fmtCab(d.stock || 0)} en stock</span></div>
+      ${p.obs ? `<div class="sub">${esc(p.obs)}</div>` : ''}
+      <div class="btns"><button class="small" onclick="editarPersona('${p.id}')">Editar</button><button class="small danger" onclick="borrarPersona('${p.id}')">Borrar</button></div></div>`; }).join('')
+    : '<div class="empty">Todavía no hay personas cargadas.</div>')
+    + (db.compras.some(c => c.origen === 'cria') ? `<div class="card item"><div class="top"><span class="title">Campo (cría propia)</span><span class="sub">${(PD.get(CAMPO_ID) || {}).stock || 0} en stock</span></div>
+      <div class="sub">Las crías pasadas desde Vacas → Cría. Es automático, no se edita.</div></div>` : '');
+
+  // compras
+  const cs = [...db.compras].sort(porFecha).reverse();
+  $('#listCompras').innerHTML = cs.length ? cs.map(c => {
+    const vend = R.vendidosPorLote.get(c.id) || 0, quedan = c.cantidad - vend, L = R.lots.find(L => L.c.id === c.id);
+    return `<div class="card item"><div class="top"><span class="title">${fmtF(c.fecha)} · ${c.cantidad} terneros</span><span class="sub">${quedan ? `quedan ${quedan}` : 'vendido todo'}</span></div>
+      ${c.origen === 'cria' ? `<div><span class="tag" style="background:var(--accent-2);color:var(--accent)">CRÍA PROPIA · pase desde Vacas</span></div>`
+        : `<div class="sub">De: <b>${esc(nombreLote(c))}</b></div>`}
+      <div class="rows"><span>Kilos</span><span class="r">${c.kg ? `${fmtN(c.kg)} kg (${fmtN(c.kg/c.cantidad,1)} prom.)` : '—'}</span>
+      <span>Costo total</span><span class="r">${fmtM(costoCompra(c))}</span>
+      <span>Por ternero</span><span class="r">${fmtM(costoCompra(c)/c.cantidad)}</span></div>
+      ${c.caravanas && c.caravanas.length ? `<div class="sub">Caravanas de compra: ${esc(rangos(c.caravanas))}</div>` : ''}
+      ${(c.asignaciones || []).map(a => `<div class="top"><span class="sub">Asignadas el ${fmtF(a.fecha)}: ${esc(rangos(a.caravanas))}</span>
+        <button class="small danger" onclick="quitarAsignacion('${c.id}','${a.id}')">Quitar</button></div>`).join('')}
+      ${L && L.u > 0 ? `<div class="sub"><b>${L.u}</b> en stock sin caravana</div>` : ''}
+      ${(() => { const i = AP.lotes.get(c.id); return i && i.ult ? `<div class="sub">Última pesada ${fmtF(diaAFecha(i.ult.dia))}: <b>${fmtN(i.ult.kg, 1)} kg</b> prom. · <b>${fmtKgDia(i.adpv)}</b> desde la compra</div>` : ''; })()}
+      ${c.tercero ? `<div class="sub">${esc(c.tercero)}</div>` : ''}${c.obs ? `<div class="sub">${esc(c.obs)}</div>` : ''}
+      <div class="btns">${L && L.u > 0 ? `<button class="small" onclick="asignarCaravanas('${c.id}')">Asignar caravanas</button>` : ''}${c.origen === 'cria'
+        ? `<button class="small" onclick="irA('vacas-cria')">Editar en Vacas → Cría</button>`
+        : `<button class="small" onclick="editarCompra('${c.id}')">Editar</button><button class="small danger" onclick="borrar('compras','${c.id}')">Borrar</button>`}</div></div>`;
+  }).join('') : '<div class="empty">Todavía no hay compras.</div>';
+
+  // ventas
+  const vs = [...R.ventasR].reverse();
+  $('#listVentas').innerHTML = vs.length ? vs.map(s => `<div class="card item">
+      <div class="top"><span class="title">${fmtF(s.v.fecha)} · ${s.v.cantidad} ${s.v.cantidad === 1 ? 'ternero' : 'terneros'}</span><span class="sub">${fmtN(s.dias)} días prom.</span></div>
+      ${s.v.baja ? `<div><span class="tag" style="background:var(--accent-2);color:var(--bad)">BAJA · ${esc(s.v.motivo || 'Otro')}</span></div>` : ''}
+      ${bloqueResultado(s)}
+      <div class="sep"></div>
+      ${s.v.baja ? '' : `<div class="sub">Kilos por ternero: ${fmtN(s.kgCU,1)} → ${fmtN(s.kgVU,1)} kg (+${fmtN(s.kgVU - s.kgCU,1)})</div>`}
+      <div class="sub">De: <b>${s.v.dueno ? esc(nombreDueno(s.v.dueno === '__sin' ? '' : s.v.dueno)) : 'General'}</b></div>
+      <div class="sub">Salieron: ${s.pieces.map(p => `${p.n} del lote del ${fmtF(p.L.c.fecha)} (${esc(nombreLote(p.L.c))})`).join(', ')}</div>
+      ${s.pieces.some(p => p.tags.length) ? `<div class="sub">Caravanas: ${esc(rangos(s.pieces.flatMap(p => p.tags)))}</div>` : ''}
+      ${s.v.tercero ? `<div class="sub">${esc(s.v.tercero)}</div>` : ''}${s.v.obs ? `<div class="sub">${esc(s.v.obs)}</div>` : ''}
+      <div class="btns"><button class="small" onclick="editarVenta('${s.v.id}')">Editar</button><button class="small danger" onclick="borrar('ventas','${s.v.id}')">Borrar</button></div></div>`).join('')
+    : '<div class="empty">Todavía no hay ventas.</div>';
+
+  // pesadas
+  llenarLotesPesada();
+  const pes = [...db.pesadas].sort((a, b) => a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : (b.creado || 0) - (a.creado || 0));
+  $('#listPesadas').innerHTML = pes.length ? pes.map(p => {
+    const a = AP.porPesada.get(p.id), L = R.lots.find(L => L.c.id === p.compraId);
+    return `<div class="card item">
+      <div class="top"><span class="title">${fmtF(p.fecha)} · ${p.tipo === 'animal' ? `caravana ${esc(p.caravana)}` : `${p.cantidad} animales`}</span>
+        <span class="sub">${L ? `lote del ${fmtF(L.c.fecha)}` : 'lote borrado'}</span></div>
+      ${L ? `<div class="sub">De: ${esc(nombreLote(L.c))}</div>` : ''}
+      ${a ? `<div class="rows"><span>Peso${p.tipo === 'lote' ? ' promedio' : ''}</span><span class="r"><b>${fmtN(a.prom, 1)} kg</b></span>
+        <span>Ganancia diaria desde la compra</span><span class="r">${fmtKgDia(a.adpvCompra)}</span>
+        ${a.adpvPrev != null && a.desde !== a.info.d0 ? `<span>Desde la pesada anterior</span><span class="r">${fmtKgDia(a.adpvPrev)}</span>` : ''}</div>` : ''}
+      ${p.obs ? `<div class="sub">${esc(p.obs)}</div>` : ''}
+      <div class="btns"><button class="small" onclick="editarPesada('${p.id}')">Editar</button><button class="small danger" onclick="borrarPesada('${p.id}')">Borrar</button></div></div>`;
+  }).join('') : '<div class="empty">Todavía no hay pesadas.</div>';
+
+  // gastos
+  const gs = [...db.gastos].sort((a, b) => a.periodo < b.periodo ? 1 : a.periodo > b.periodo ? -1 : (b.creado||0) - (a.creado||0));
+  $('#listGastos').innerHTML = gs.length ? gs.map(g => `<div class="card item">
+      <div class="top"><span class="title">${periodoTxt(g)}</span><span class="sub">${{dias:'por días', mensual:'mensual', anual:'anual'}[g.tipo]}</span></div>
+      <div class="rows">
+        ${g.maizTn || g.maizCosto ? `<span>Maíz${g.maizTn ? ` (${fmtN(g.maizTn,2)} tn)` : ''}</span><span class="r">${fmtM(g.maizCosto)}</span>` : ''}
+        ${g.campoHa || g.campoCosto ? `<span>Campo${g.campoHa ? ` (${fmtN(g.campoHa,1)} ha)` : ''}</span><span class="r">${fmtM(g.campoCosto)}</span>` : ''}
+        ${g.veterinaria ? `<span>Veterinaria</span><span class="r">${fmtM(g.veterinaria)}</span>` : ''}
+        ${g.empleado ? `<span>Empleado</span><span class="r">${fmtM(g.empleado)}</span>` : ''}
+        <span><b>Total</b></span><span class="r"><b>${fmtM(gastoTotal(g))}</b></span></div>
+      ${g.obs ? `<div class="sub">${esc(g.obs)}</div>` : ''}
+      <div class="btns"><button class="small" onclick="editarGasto('${g.id}')">Editar</button><button class="small danger" onclick="borrar('gastos','${g.id}')">Borrar</button></div></div>`).join('')
+    : '<div class="empty">Todavía no hay gastos cargados.</div>';
+
+  // resumen
+  const vendidos = R.ventasR.filter(x => !x.v.baja).reduce((s, x) => s + x.v.cantidad, 0);
+  const bajasR = R.ventasR.filter(x => x.v.baja);
+  const bajasN = bajasR.reduce((s, x) => s + x.v.cantidad, 0), bajasPerd = bajasR.reduce((s, x) => s - x.gan, 0);
+  const ganTot = R.ventasR.reduce((s, x) => s + x.gan, 0);
+  const invTot = R.ventasR.reduce((s, x) => s + x.costo + x.engorde, 0);
+  const realTodas = R.ventasR.length > 0 && R.ventasR.every(s => s.realOk);
+  const ganRTot = realTodas ? R.ventasR.reduce((s, x) => s + x.ganR, 0) : 0;
+  const invRTot = realTodas ? R.ventasR.reduce((s, x) => s + x.costoR + x.engR, 0) : 0;
+  const invStock = R.stock.reduce((s, x) => s + x.L.unit * x.L.rest + x.engorde, 0);
+  const comprados = db.compras.reduce((s, c) => s + c.cantidad, 0);
+  const anioAct = hoy().slice(0, 4);
+  // parte de cada carga que cae dentro del año actual (prorrateo por días)
+  const yA = dayNum(`${anioAct}-01-01`), yB = dayNum(`${+anioAct + 1}-01-01`);
+  const gAnio = db.gastos.map(g => { const p = periodoDias(g), f = Math.max(0, Math.min(p.end, yB) - Math.max(p.start, yA)) / (p.end - p.start);
+    const o = {...g}; camposG.forEach(k => o[k] = (g[k] || 0) * f); return o; });
+  $('#resumen').innerHTML = `
+    ${R.errores.length ? `<div class="alert bad">Hay ventas con problemas: ${esc(R.errores[0].msg)}</div>` : ''}
+    <div class="kpis">
+      <div class="kpi"><div class="l">En stock</div><div class="v">${R.enStock}</div></div>
+      <div class="kpi"><div class="l">Comprados / vendidos</div><div class="v">${comprados} / ${vendidos}</div></div>
+      <div class="kpi"><div class="l">Ganancia realizada</div><div class="v ${signo(ganTot)}">${fmtM(ganTot)}</div><div class="l">${invTot ? fmtP(ganTot / invTot) + ' sobre lo invertido' : ''}</div></div>
+      <div class="kpi"><div class="l">Promedio por ternero vendido</div><div class="v ${signo(ganTot)}">${vendidos ? fmtM(ganTot / vendidos) : '—'}</div>${bajasN ? '<div class="l">ya descuenta las bajas</div>' : ''}</div>
+      ${bajasN ? `<div class="kpi" style="grid-column:1/-1"><div class="l">Bajas de stock (muerte, robo, consumo…)</div><div class="v neg">${bajasN} · −${fmtM(bajasPerd)}</div><div class="l">incluidas en la ganancia realizada</div></div>` : ''}
+      ${realTodas ? `<div class="kpi" style="grid-column:1/-1"><div class="l">Ganancia ajustada por inflación ${R.ventasR.some(s => s.prov) ? '<span class="tag">provisoria</span>' : ''}</div>
+        <div class="v ${signo(ganRTot)}">${fmtM(ganRTot)} <span style="font-size:15px">(${fmtP(ganRTot / invRTot)})</span></div><div class="l">en pesos del día de cada venta</div></div>` : ''}
+      <div class="kpi" style="grid-column:1/-1"><div class="l">Invertido en el stock actual (compra + engorde hasta hoy)</div><div class="v">${fmtM(invStock)}</div></div>
+      <div class="kpi" style="grid-column:1/-1"><div class="l">Valor del stock a precio de mercado</div>
+        ${VS.pr ? `<div class="v">${fmtM(VS.total)}</div>
+          <div class="l">Ganancia sin realizar: <b class="${signo(VS.total - invStock)}">${fmtM(VS.total - invStock)}</b> · precio ${fmtM(VS.pr.precioKg)}/kg del ${fmtF(VS.pr.fecha)}${VS.pr.fuente ? ` (${esc(VS.pr.fuente)})` : ''}</div>
+          ${[...VS.porLote.values()].some(x => x.base !== 'pesada') ? '<div class="l">Los lotes sin pesadas se valúan con el peso de compra.</div>' : ''}`
+          : '<div class="l" style="margin:4px 0">Cargá un precio de referencia por kilo para ver cuánto vale hoy el stock.</div>'}
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="small primary" onclick="cargarPrecio()">${VS.pr ? 'Actualizar precio' : 'Cargar precio de mercado'}</button>
+          ${db.precios.length ? `<button class="small" onclick="verPrecios()">Ver precios cargados (${db.precios.length})</button>` : ''}</div></div>
+    </div>
+    ${R.sinAsignar > 1 ? `<div class="alert">Hay ${fmtM(R.sinAsignar)} de gastos en días sin terneros en stock; no se cargaron a ningún animal.</div>` : ''}
+    ${PD.size > 1 || [...PD.keys()].some(k => k) ? `<h3>Por persona</h3>${[...PD.entries()].map(([id, d]) => tarjetaDueno(id, d)).join('')}` : ''}
+    <h3>Stock por lote (los primeros salen primero)</h3>
+    <div class="card">${R.stock.length ? `<table><thead><tr><th>Compra</th><th style="text-align:left">De</th><th>Quedan</th><th>Kg hoy (est.)</th><th>Costo x cab. hoy</th>${VS.pr ? '<th>Valor x cab.</th>' : ''}</tr></thead><tbody>
+      ${R.stock.map(x => { const v = VS.porLote.get(x.L.c.id); return `<tr><td>${fmtF(x.L.c.fecha)}</td><td style="text-align:left">${esc(nombreLote(x.L.c))}</td><td>${x.L.rest}</td>
+        <td>${v.kg ? fmtN(v.kg, 0) + (v.base === 'pesada' ? '' : '*') : '—'}</td><td>${fmtM(x.L.unit + x.engU)}</td>${VS.pr ? `<td>${fmtM(v.valor / x.L.rest)}</td>` : ''}</tr>`; }).join('')}</tbody></table>
+      ${[...VS.porLote.values()].some(v => v.base !== 'pesada') ? '<div class="hint" style="margin-top:6px">* sin pesadas: es el peso de compra.</div>' : ''}` : '<div class="empty">Sin stock.</div>'}</div>
+    <h3>Engorde ${anioAct} (parte proporcional)</h3>
+    <div class="card"><div class="rows">
+      <span>Maíz</span><span class="r">${fmtN(gAnio.reduce((s, g) => s + g.maizTn, 0), 2)} tn · ${fmtM(gAnio.reduce((s, g) => s + g.maizCosto, 0))}</span>
+      <span>Campo</span><span class="r">${fmtM(gAnio.reduce((s, g) => s + g.campoCosto, 0))}</span>
+      <span>Veterinaria</span><span class="r">${fmtM(gAnio.reduce((s, g) => s + g.veterinaria, 0))}</span>
+      <span>Empleado</span><span class="r">${fmtM(gAnio.reduce((s, g) => s + g.empleado, 0))}</span>
+      <span><b>Total</b></span><span class="r"><b>${fmtM(gAnio.reduce((s, g) => s + gastoTotal(g), 0))}</b></span></div></div>`;
+  renderInfl(); buscarCaravana(); renderDrive(); renderAviso(); pvVenta();
+}
+
+/* ---------- buscar caravana ---------- */
+function buscarCaravana(){
+  let q = normId($('#qCar').value); const out = $('#rCar');
+  if (!q){ out.innerHTML = R.tagInfo.size ? `${R.tagInfo.size} caravanas cargadas.` : 'Todavía no hay compras con caravanas.'; return; }
+  const porChip = (db.fichas || []).find(f => f.chip === q); if (porChip) q = porChip.caravana;   // también acepta el número de chip
+  const i = R.tagInfo.get(q);
+  if (!i){ out.innerHTML = 'No se encontró esa caravana.'; return; }
+  setTimeout(() => { if (!out.querySelector('.btnFicha')) out.insertAdjacentHTML('beforeend', `<div style="margin-top:8px"><button class="small primary btnFicha" onclick="fichaAnimal('${esc(q)}')">Abrir ficha del animal</button></div>`); });
+  const T = dayNum(hoy()), L = i.L;
+  const extra = i.asig ? ` · caravana puesta el <b>${fmtF(i.asig)}</b>` : '';
+  if (!i.venta && !L.tags.includes(q)){ out.innerHTML = `Lote del <b>${fmtF(L.c.fecha)}</b>${extra}. <span class="neg">Esta caravana tiene un problema: revisá el aviso en Resumen.</span>`; return; }
+  if (i.venta){
+    const s = R.ventasR.find(s => s.v.id === i.venta.id);
+    out.innerHTML = `Comprada el <b>${fmtF(L.c.fecha)}</b> (lote de ${L.c.cantidad})${extra} · `
+      + (i.venta.baja ? `<span class="neg">dada de baja el <b>${fmtF(i.venta.fecha)}</b> (${esc(i.venta.motivo || 'Otro')})</span>`
+                      : `vendida el <b>${fmtF(i.venta.fecha)}</b>${i.venta.tercero ? ' a ' + esc(i.venta.tercero) : ''}`)
+      + ` · ${dayNum(i.venta.fecha) - L.day} días en el campo`
+      + (s && !i.venta.baja ? `<br>Ganancia promedio de esa venta: <b class="${signo(s.ganU)}">${fmtM(s.ganU)}</b> por ternero` : '');
+  } else {
+    const st = R.stock.find(x => x.L === L);
+    out.innerHTML = `<b>En stock.</b> Comprada el <b>${fmtF(L.c.fecha)}</b> (lote de ${L.c.cantidad})${extra} · ${Math.max(0, T - L.day)} días en el campo`
+      + (st ? `<br>Costo hoy: <b>${fmtM(L.unit + st.engU)}</b> (compra ${fmtM(L.unit)} + engorde ${fmtM(st.engU)})` : '');
+  }
+}
+$('#qCar').oninput = buscarCaravana;
+
+/* ---------- inflación: bajar, cargar a mano, mostrar ---------- */
+async function actualizarInflacion(silencioso){
+  const auto = {}, fuentes = [];
+  const conTiempo = (url) => Promise.race([fetch(url).then(r => { if (!r.ok) throw 0; return r.json(); }), new Promise((_, rej) => setTimeout(() => rej('tiempo'), 15000))]);
+  try {   // INDEC vía datos.gob.ar: índice de precios nivel general, base dic 2016
+    const j = await conTiempo('https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=1000&format=json');
+    const d = j.data.filter(x => x[1] != null).sort((a, b) => a[0] < b[0] ? -1 : 1);
+    for (let i = 1; i < d.length; i++) auto[d[i][0].slice(0, 7)] = (d[i][1] / d[i-1][1] - 1) * 100;
+    fuentes.push('INDEC (datos.gob.ar)');
+  } catch(e){}
+  try {   // respaldo: ArgentinaDatos (% mensual); completa los meses que falten
+    const j = await conTiempo('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
+    let n = 0;
+    for (const x of j){ const m = String(x.fecha).slice(0, 7); if (!(m in auto) && isFinite(x.valor)){ auto[m] = +x.valor; n++; } }
+    if (n) fuentes.push('ArgentinaDatos');
+  } catch(e){}
+  if (!Object.keys(auto).length){ if (!silencioso) avisar('No se pudo bajar la inflación. Revisá la conexión a internet e intentá de nuevo.'); return; }
+  infl.auto = auto; infl.act = hoy(); infl.fuente = fuentes.join(' + '); saveInfl(); render();
+  if (!silencioso) avisar(`Inflación actualizada hasta <b>${mesTxt(Object.keys(auto).sort().pop())}</b>.`);
+}
+$('#btnInfl').onclick = async () => { const b = $('#btnInfl'); b.disabled = true; b.textContent = 'Bajando…'; await actualizarInflacion(false); b.disabled = false; b.textContent = 'Actualizar desde internet'; };
+const fI = $('#fInfl');
+fI.onsubmit = e => {
+  e.preventDefault();
+  if (!/^\d{4}-\d{2}$/.test(fI.mes.value)) return avisar('Elegí el mes.');
+  const v = num(fI.pct.value);
+  if (!fI.pct.value.trim() || v < -50 || v > 100) return avisar('Escribí el % del mes (por ejemplo 2,1).');
+  infl.manual[fI.mes.value] = v; saveInfl(); marcarCambio(); fI.reset(); render();
+};
+function borrarInflManual(m){ delete infl.manual[m]; saveInfl(); marcarCambio(); render(); }
+function renderInfl(){
+  const p = {...infl.auto, ...infl.manual}, ms = Object.keys(p).sort();
+  if (!ms.length){ $('#inflEstado').innerHTML = 'Todavía no hay datos de inflación. Tocá "Actualizar desde internet" (hace falta conexión una vez).'; }
+  else {
+    const ult = ms.slice(-3).map(m => `${mesTxt(m)}: <b>${fmtN(p[m], 1)}%</b>${m in infl.manual ? ' (a mano)' : ''}`).join('<br>');
+    const hoyM = hoy().slice(0, 7), faltan = [];
+    for (let m = mesSig(ms[ms.length - 1]); m <= hoyM; m = mesSig(m)) faltan.push(mesTxt(m));
+    $('#inflEstado').innerHTML = `${ult}`
+      + (infl.act ? `<br><span style="font-size:12px">Bajado el ${fmtF(infl.act)} de ${esc(infl.fuente)}</span>` : '')
+      + (faltan.length ? `<div class="alert">Sin publicar todavía: ${faltan.join(', ')}. Se estiman con el último dato y las ventas quedan como <b>provisorias</b>.</div>` : '');
+  }
+  const man = Object.keys(infl.manual).sort().reverse();
+  $('#inflManual').innerHTML = man.length ? `<p style="font-size:14px;color:var(--muted);margin:12px 0 4px">Cargados a mano:</p>` + man.map(m =>
+    `<div class="top" style="padding:4px 0"><span>${mesTxt(m)}: <b>${fmtN(infl.manual[m], 2)}%</b></span><button class="small danger" onclick="borrarInflManual('${m}')">Quitar</button></div>`).join('') : '';
+}
+
+/* ---------- exportar ---------- */
+function csv(rows){
+  return '﻿' + rows.map(r => r.map(c => {
+    if (typeof c === 'number') c = String(Math.round(c * 100) / 100).replace('.', ',');
+    c = String(c ?? ''); return /[;"\n\r]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c;
+  }).join(';')).join('\r\n');
+}
+async function descargarArchivo(nombre, texto, tipo){
+  const blob = new Blob([texto], {type:tipo});
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.share){
+    // el celular acepta mejor compartir como texto plano (el nombre sigue terminando en .json o .csv)
+    try {
+      const file = new File([texto], nombre, {type:'text/plain'});
+      if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:nombre}); return true; }
+    } catch(e){ if (e.name === 'AbortError') return false; }
+    try { await navigator.share({title:nombre, text:texto}); return true; }       // último recurso: mandar el contenido como texto
+    catch(e){ if (e.name === 'AbortError') return false; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  return true;
+}
+const exportes = {
+  compras: () => [['Fecha','De','Cantidad','Kg total','Kg promedio','Precio','Modo precio','Flete/comisión','Costo total','Costo por ternero','Vendidos','En stock','Vendedor','Caravanas','Observaciones'],
+    ...[...db.compras].sort(porFecha).map(c => { const v = R.vendidosPorLote.get(c.id) || 0;
+      return [fmtF(c.fecha), nombreLote(c), c.cantidad, c.kg, c.kg / c.cantidad, c.precio, c.modo === 'kg' ? 'por kilo' : 'total', c.gastos, costoCompra(c), costoCompra(c) / c.cantidad, v, c.cantidad - v, c.tercero,
+        rangos([...(c.caravanas || []), ...(c.asignaciones || []).flatMap(a => a.caravanas)]), c.obs]; })],
+  ventas: () => [['Tipo','Fecha','De','Cantidad','Kg total','Kg compra x cab.','Kg venta x cab.','Cobrado neto','Costo compra','Gastos engorde','Ganancia total','Ganancia por ternero','% sobre lo invertido',
+                  'Inflación del período %','Ganancia ajustada total','Ganancia ajustada x ternero','% ajustado','Provisoria','Días promedio','Lotes de origen','Caravanas','Comprador','Observaciones'],
+    ...R.ventasR.map(s => [s.v.baja ? `Baja: ${s.v.motivo || 'Otro'}` : 'Venta', fmtF(s.v.fecha),
+      [...new Set(s.pieces.map(p => nombreLote(p.L.c)))].join(', '), s.v.cantidad, s.v.kg, s.kgCU, s.kgVU, s.neto, s.costo, s.engorde, s.gan, s.ganU, s.pct * 100,
+      s.realOk ? s.inflP * 100 : '', s.realOk ? s.ganR : '', s.realOk ? s.ganRU : '', s.realOk ? s.pctR * 100 : '', s.realOk ? (s.prov ? 'sí' : 'no') : 'sin datos',
+      Math.round(s.dias), s.pieces.map(p => `${p.n} del ${fmtF(p.L.c.fecha)}`).join(', '), rangos(s.pieces.flatMap(p => p.tags)), s.v.tercero, s.v.obs])],
+  stock: () => [['Fecha compra','Quedan','Días en campo','Costo compra x cab.','Engorde acumulado x cab.','Costo total x cab.','Costo total','Caravanas en stock','Sin caravana'],
+    ...R.stock.map(x => [fmtF(x.L.c.fecha), x.L.rest, x.dias, x.L.unit, x.engU, x.L.unit + x.engU, (x.L.unit + x.engU) * x.L.rest, rangos(x.L.tags), x.L.u])],
+  personas: () => [['Persona','Comprados','Invertido en compras $','Vendidos','Cobrado $','Bajas','Pérdida por bajas $','Ganancia realizada $','En stock','Invertido en su stock hoy $'],
+    ...[...porDueno().entries()].map(([id, d]) => [nombreDueno(id), d.compradosN, d.invertido, d.vendidosN, d.cobrado, d.bajasN, d.perdBajas, d.ganancia, d.stock, d.invStock])],
+  gastos: () => [['Tipo','Período','Desde','Hasta','Días','Maíz tn','Maíz $','Campo ha','Campo $','Veterinaria $','Empleado $','Total $','Observaciones'],
+    ...[...db.gastos].sort((a, b) => periodoDias(a).start - periodoDias(b).start).map(g => { const p = periodoDias(g); return [g.tipo, periodoTxt(g),
+      fmtF(diaAFecha(p.start)), fmtF(diaAFecha(p.end - 1)), p.end - p.start, g.maizTn, g.maizCosto, g.campoHa, g.campoCosto, g.veterinaria, g.empleado, gastoTotal(g), g.obs]; })]
+};
+document.querySelectorAll('[data-exp]').forEach(b => b.onclick = () =>
+  descargarArchivo(`terneros-${b.dataset.exp}-${hoy()}.csv`, csv(exportes[b.dataset.exp]()), 'text/csv;charset=utf-8'));
+async function guardarCopia(){
+  const hecho = await descargarArchivo(`terneros-copia-${hoy()}.json`, JSON.stringify({app:'terneros', version:4, fecha:hoy(), ...db, vacas:vdb, inflacion:infl,
+    drive: (drive.url || drive.ultimaUrl) ? {url:drive.url || drive.ultimaUrl, clave:drive.url ? drive.clave : drive.ultimaClave} : null}), 'application/json');
+  if (!hecho) return;       // si se canceló el menú de compartir, no cuenta como copia hecha
+  avisos.ultimaCopia = new Date().toISOString(); guardarAvisos(); renderAviso();
+}
+$('#btnBackup').onclick = guardarCopia;
+$('#btnRestore').onclick = () => $('#fileRestore').click();
+$('#fileRestore').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!Array.isArray(d.compras) || !Array.isArray(d.ventas) || !Array.isArray(d.gastos)) throw 0;
+    if (await ask(`<h2>¿Restaurar la copia del ${fmtF(d.fecha)}?</h2><p style="font-size:14px">${d.compras.length} compras, ${d.ventas.length} ventas, ${d.gastos.length} cargas de gastos${d.vacas ? ` y los datos de vacas` : ''}. Reemplaza todo lo que hay ahora en el celular.</p>`,
+      [['si','Restaurar','primary'], ['no','Cancelar']]) !== 'si') return;
+    db = dbDesde(d);
+    vdb = {...vVacio(), ...(d.vacas || {})}; guardarVLocal();
+    save();
+    if (d.inflacion && d.inflacion.auto){ infl = {auto:d.inflacion.auto, manual:d.inflacion.manual || {}, act:d.inflacion.act || null, fuente:d.inflacion.fuente || ''}; saveInfl(); }
+    render();
+    // la copia trae la planilla de Drive: si este celular no está conectado, se conecta solo (sin pedir la dirección)
+    if (d.drive && d.drive.url && !drive.url){
+      drive = {omitido:true, ultimaUrl:d.drive.url, ultimaClave:d.drive.clave}; guardarDrive(); cerrarWiz();
+      try { await conectarDrive(d.drive.url, d.drive.clave); avisar('Copia restaurada y conectada con tu planilla de Google Drive.'); }
+      catch(e){ renderDrive(); avisar('Copia restaurada. No se pudo conectar con Drive ahora (' + esc(textoError(e)) + '). Podés reconectar desde Resumen → Google Drive.'); }
+      return;
+    } avisar('Copia restaurada.');
+  } catch(err){ avisar('Ese archivo no es una copia válida de esta app.'); }
+};
+
+/* =====================================================================
+   VACAS: stock propio, compras, ventas, cría (nacimientos y pases), bajas y gastos
+   ===================================================================== */
+const VKEY = KEY + '-vacas';
+const vVacio = () => ({stock:[], compras:[], ventas:[], bajas:[], nacimientos:[], pases:[], gastos:[]});
+function loadV(){ try { const d = JSON.parse(localStorage.getItem(VKEY)); if (d && typeof d === 'object') return {...vVacio(), ...d}; } catch(e){} return vVacio(); }
+let vdb = loadV();
+function guardarVLocal(){ try { localStorage.setItem(VKEY, JSON.stringify(vdb)); } catch(e){ alert('No se pudieron guardar los datos en el celular.'); } }
+function saveV(){ guardarVLocal(); marcarCambio(); }
+
+const CAT_TXT = {vacas:'vacas', crias:'crías'};
+const MOTIVOS = [['Muerte','Muerte'], ['Robo / pérdida','Robo / pérdida'], ['Consumo propio','Consumo propio'], ['Otro','Otro']];
+const MODO_PRECIO = [['kg','por kilo'], ['total','total del lote']];
+const vc = (n, l, t, extra) => ({n, l, t, ...extra});
+const VC = {
+  fecha: vc('fecha', 'Fecha', 'date'),
+  cantidad: vc('cantidad', 'Cantidad', 'int'),
+  caravanas: vc('caravanas', 'Caravanas (opcional)', 'car'),
+  motivo: vc('motivo', 'Motivo', 'sel', {op:MOTIVOS}),
+  obs: vc('obs', 'Observaciones', 'area'),
+};
+// Formularios. col = dónde se guarda; fijo = valores que pone el formulario; si = el campo se muestra solo si...
+const VFORMS = {
+  stock: {col:'stock', tit:'Stock inicial', btn:'Guardar stock inicial',
+    hint:'Animales que ya tenías en el campo, sin compra. Se puede cargar en varias veces.',
+    campos:[VC.fecha, vc('categoria', 'Categoría', 'sel', {op:[['vacas','Vacas'], ['crias','Crías']]}), VC.cantidad, VC.caravanas, VC.obs]},
+  bajasV: {col:'bajas', fijo:{categoria:'vacas'}, tit:'Baja de vacas', btn:'Guardar baja',
+    hint:'Muerte, robo, consumo propio u otra salida que no es una venta.',
+    campos:[VC.fecha, VC.cantidad, VC.motivo, vc('caravanas', 'Caravanas de las que salen (opcional)', 'car'), VC.obs]},
+  compras: {col:'compras', tit:'Compra de vacas', btn:'Guardar compra',
+    campos:[VC.fecha, VC.cantidad, vc('kg', 'Kilos totales (opcional)', 'dec'), vc('modo', 'Precio', 'sel', {op:MODO_PRECIO}),
+      vc('precio', 'Precio $', 'dec'), vc('gastos', 'Flete, comisión, guías $', 'dec', {ph:'0'}), vc('tercero', 'Vendedor / remate', 'text', {full:1}), VC.caravanas, VC.obs]},
+  ventas: {col:'ventas', tit:'Venta de vacas', btn:'Guardar venta',
+    campos:[VC.fecha, VC.cantidad, vc('kg', 'Kilos totales (opcional)', 'dec'), vc('modo', 'Precio', 'sel', {op:MODO_PRECIO}),
+      vc('precio', 'Precio $', 'dec'), vc('gastos', 'Flete, comisión, guías $', 'dec', {ph:'0'}), vc('tercero', 'Comprador / remate', 'text', {full:1}),
+      vc('caravanas', 'Caravanas de las que salen (opcional)', 'car'), VC.obs]},
+  nac: {col:'nacimientos', tit:'Nacimientos', btn:'Guardar nacimientos',
+    hint:'Terneros nacidos en el campo. Quedan en el stock de cría hasta que los pases a vacas o a terneros.',
+    campos:[VC.fecha, VC.cantidad, vc('machos', 'Machos (opcional)', 'int'), vc('hembras', 'Hembras (opcional)', 'int'),
+      vc('madres', 'Madres: caravanas (opcional)', 'text', {full:1}), vc('caravanas', 'Caravanas de las crías (opcional)', 'car'), VC.obs]},
+  pases: {col:'pases', tit:'Pase de crías', btn:'Guardar pase',
+    hint:'Las crías salen del stock de cría y pasan al stock de vacas o al de terneros. Si pasan a terneros, aparecen como un lote en Terneros → Compras.',
+    campos:[VC.fecha, vc('destino', 'Pasan a', 'sel', {op:[['vacas','Stock de vacas'], ['terneros','Stock de terneros']]}), VC.cantidad,
+      vc('kg', 'Kilos totales (opcional)', 'dec', {si:x => x.destino === 'terneros'}),
+      vc('valor', 'Valor por cabeza $ (opcional)', 'dec', {si:x => x.destino === 'terneros', ph:'0'}),
+      vc('caravanas', 'Caravanas de las que pasan (opcional)', 'car'), VC.obs]},
+  bajasC: {col:'bajas', fijo:{categoria:'crias'}, tit:'Baja de crías', btn:'Guardar baja',
+    hint:'Muerte, robo u otra salida de crías que no es un pase ni una venta.',
+    campos:[VC.fecha, VC.cantidad, VC.motivo, vc('caravanas', 'Caravanas de las que salen (opcional)', 'car'), VC.obs]},
+  gastos: {col:'gastos', tit:'Gastos', btn:'Guardar gastos',
+    hint:'Campo destinado a la alimentación y otros gastos del rodeo.',
+    campos:[vc('tipo', 'Período', 'sel', {op:[['mensual','Un mes'], ['dias','Cantidad de días'], ['anual','Año/s']], full:1}),
+      vc('mes', 'Mes', 'month', {si:x => x.tipo === 'mensual', full:1}),
+      vc('desde', 'Desde', 'date', {si:x => x.tipo === 'dias'}), vc('dias', 'Cantidad de días', 'int', {si:x => x.tipo === 'dias'}),
+      vc('anio', 'Desde el año', 'int', {si:x => x.tipo === 'anual'}), vc('anios', 'Cantidad de años', 'int', {si:x => x.tipo === 'anual', ph:'1'}),
+      vc('campoHa', 'Campo para alimentación (ha)', 'dec'), vc('campoCosto', 'Costo del campo $', 'dec'),
+      vc('veterinaria', 'Veterinaria $', 'dec'), vc('empleado', 'Empleado $', 'dec'),
+      vc('otros', 'Otros gastos $', 'dec'), vc('otrosDesc', 'Detalle de otros gastos', 'text'), VC.obs]},
+};
+// Páginas del menú Vacas
+const VPAG = {
+  stock:   {forms:['stock', 'bajasV'], seg:['Stock inicial', 'Baja'], lista:[['stock'], ['bajas', x => x.categoria === 'vacas']], listaTit:'Movimientos de stock'},
+  compras: {forms:['compras'], lista:[['compras']], listaTit:'Compras cargadas'},
+  ventas:  {forms:['ventas'], lista:[['ventas']], listaTit:'Ventas cargadas'},
+  cria:    {forms:['nac', 'pases', 'bajasC'], seg:['Nacimiento', 'Pase', 'Baja'], lista:[['nacimientos'], ['pases'], ['bajas', x => x.categoria === 'crias']], listaTit:'Movimientos de cría'},
+  gastos:  {forms:['gastos'], lista:[['gastos']], listaTit:'Gastos cargados'},
+};
+
+/* ---------- movimientos de stock y validación por fecha ---------- */
+const VMOV = {
+  stock:       x => [{op:'+', cat:x.categoria, n:x.cantidad, tags:x.caravanas || []}],
+  compras:     x => [{op:'+', cat:'vacas', n:x.cantidad, tags:x.caravanas || []}],
+  nacimientos: x => [{op:'+', cat:'crias', n:x.cantidad, tags:x.caravanas || []}],
+  ventas:      x => [{op:'-', cat:'vacas', n:x.cantidad, tags:x.caravanas || []}],
+  bajas:       x => [{op:'-', cat:x.categoria, n:x.cantidad, tags:x.caravanas || []}],
+  pases:       x => [{op:'-', cat:'crias', n:x.cantidad, tags:x.caravanas || []},
+                     ...(x.destino === 'vacas' ? [{op:'+', cat:'vacas', n:x.cantidad, tags:x.caravanas || []}] : [])],
+};
+function vcalc(v){
+  const S = {vacas:{n:0, tags:new Set()}, crias:{n:0, tags:new Set()}}, errores = [], items = [];
+  for (const col of Object.keys(VMOV)) for (const x of (v[col] || []))
+    items.push({col, x, pri: VMOV[col](x).every(m => m.op === '+') ? 0 : 1});
+  // por fecha; el mismo día primero entran y después salen
+  items.sort((a, b) => a.x.fecha < b.x.fecha ? -1 : a.x.fecha > b.x.fecha ? 1 : a.pri - b.pri || (a.x.creado || 0) - (b.x.creado || 0));
+  for (const it of items){
+    const err = msg => errores.push({col:it.col, id:it.x.id, msg}), F = fmtF(it.x.fecha);
+    for (const m of VMOV[it.col](it.x)){
+      const st = S[m.cat], nom = CAT_TXT[m.cat];
+      if (m.op === '+'){
+        for (const t of m.tags){ if (S.vacas.tags.has(t) || S.crias.tags.has(t)) err(`La caravana ${t} ya estaba en stock el ${F}.`); else st.tags.add(t); }
+        st.n += m.n;
+      } else {
+        let ok = true;
+        for (const t of m.tags) if (!st.tags.has(t)){ err(`El ${F} la caravana ${t} no estaba en el stock de ${nom}.`); ok = false; }
+        const sinCar = m.n - m.tags.length, sinCarDisp = st.n - st.tags.size;
+        if (m.n > st.n){ err(`El ${F} había ${st.n} ${nom} en stock y salen ${m.n}.`); ok = false; }
+        else if (ok && sinCar > sinCarDisp){ err(`El ${F} había ${sinCarDisp} ${nom} sin caravana y salen ${sinCar} sin caravana. Indicá las caravanas de las que salen.`); ok = false; }
+        if (ok){ m.tags.forEach(t => st.tags.delete(t)); st.n -= m.n; }
+      }
+    }
+  }
+  return {S, errores};
+}
+let VR = vcalc(vdb);
+
+/* ---------- formularios genéricos ---------- */
+const vEdit = {};          // formulario -> id que se está editando
+const vFormDe = (col, x) => col === 'bajas' ? (x.categoria === 'crias' ? 'bajasC' : 'bajasV') : Object.keys(VFORMS).find(k => VFORMS[k].col === col);
+function vCampoHTML(c){
+  const full = c.full || c.t === 'car' || c.t === 'area' ? ' full' : '';
+  const ph = c.ph ? ` placeholder="${c.ph}"` : '';
+  const inp = {
+    date: `<input type="date" name="${c.n}">`, month: `<input type="month" name="${c.n}">`,
+    int: `<input name="${c.n}" inputmode="numeric"${ph}>`, dec: `<input name="${c.n}" inputmode="decimal"${ph}>`,
+    sel: `<select name="${c.n}">${(c.op || []).map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('')}</select>`,
+    car: `<textarea name="${c.n}" placeholder="Ej: 501-510, 520"></textarea><div class="hint">Separadas por coma o espacio. Un rango se escribe 501-510.</div>`,
+    area: `<textarea name="${c.n}"></textarea>`, text: `<input name="${c.n}">`,
+  }[c.t];
+  return `<div class="${full.trim()}" data-campo="${c.n}"><label>${c.l}</label>${inp}</div>`;
+}
+function vFormHTML(key){
+  const F = VFORMS[key];
+  return `<form class="card" id="vf-${key}" autocomplete="off">
+    <h2 class="vtit">${F.tit}</h2>${F.hint ? `<div class="hint" style="margin:-6px 0 10px">${F.hint}</div>` : ''}
+    <div class="grid">${F.campos.map(vCampoHTML).join('')}</div>
+    <div class="vpv"></div>
+    <div class="actions"><button type="button" class="vcancel" hidden>Cancelar</button><button class="primary">${F.btn}</button></div></form>`;
+}
+function vLeer(key){
+  const F = VFORMS[key], f = $('#vf-' + key), x = {};
+  for (const c of F.campos){
+    const v = f.elements[c.n].value;
+    if (c.t === 'int') x[c.n] = Math.round(num(v));
+    else if (c.t === 'dec') x[c.n] = num(v);
+    else if (c.t === 'car'){ x._pc = parseCaravanas(v); x.caravanas = x._pc.list; }
+    else x[c.n] = String(v).trim();
+  }
+  Object.assign(x, F.fijo || {});
+  for (const c of F.campos) if (c.si && !c.si(x)) delete x[c.n];
+  if (x.caravanas && x.caravanas.length && !x.cantidad) x.cantidad = x.caravanas.length;   // la cantidad sale de las caravanas
+  if (F.col === 'gastos'){
+    if (x.tipo === 'mensual') x.periodo = x.mes;
+    if (x.tipo === 'dias') x.periodo = x.desde;
+    if (x.tipo === 'anual'){ x.periodo = String(x.anio || ''); x.anios = Math.max(1, x.anios || 1); }
+    delete x.mes; delete x.desde; delete x.anio;
+  }
+  return x;
+}
+function vLlenar(key, x){
+  const F = VFORMS[key], f = $('#vf-' + key);
+  const val = {...x};
+  if (F.col === 'gastos'){ val.mes = x.tipo === 'mensual' ? x.periodo : ''; val.desde = x.tipo === 'dias' ? x.periodo : ''; val.anio = x.tipo === 'anual' ? x.periodo : ''; }
+  for (const c of F.campos){
+    const v = val[c.n], el = f.elements[c.n];
+    el.value = c.t === 'car' ? rangos(x.caravanas || []) : c.t === 'dec' ? (v ? fmtN(v, 2) : '') : (v ?? '');
+  }
+}
+function vValidar(key, x){
+  const F = VFORMS[key];
+  if (x._pc && x._pc.errs.length) return `No entiendo estas caravanas: ${esc(x._pc.errs.join(', '))}`;
+  if (x._pc && x._pc.dups.length) return `Estas caravanas están repetidas: ${esc(x._pc.dups.join(', '))}`;
+  if (F.col === 'gastos'){
+    const e = errorPeriodo({tipo:x.tipo, periodo:x.periodo, dias:x.dias, anios:x.anios});
+    if (e) return e;
+    if (!(gastoTotal(x) > 0 || x.campoHa > 0)) return 'Cargá al menos un dato.';
+    return null;
+  }
+  if (!x.fecha) return 'Falta la fecha.';
+  if (!(x.cantidad > 0)) return 'La cantidad tiene que ser mayor a 0.';
+  if (x.caravanas && x.caravanas.length > x.cantidad) return `Hay más caravanas (${x.caravanas.length}) que animales (${x.cantidad}).`;
+  if ((F.col === 'compras' || F.col === 'ventas') && !(x.precio > 0)) return 'Falta el precio.';
+  if (F.col === 'nacimientos' && (x.machos || 0) + (x.hembras || 0) > x.cantidad) return 'Machos más hembras no puede ser mayor que la cantidad.';
+  return null;
+}
+function vActualizar(key){
+  const F = VFORMS[key], f = $('#vf-' + key);
+  const x = vLeer(key);
+  // mostrar u ocultar campos que dependen de otro (por ejemplo, kilos y valor solo si el pase es a terneros)
+  const crudo = {}; for (const c of F.campos) crudo[c.n] = f.elements[c.n].value;
+  for (const c of F.campos) if (c.si) f.querySelector(`[data-campo="${c.n}"]`).hidden = !c.si(crudo);
+  $(`#vf-${key} .vpv`).innerHTML = vPreview(key, x);
+}
+function vPreview(key, x){
+  const F = VFORMS[key], S = VR.S;
+  const car = x.caravanas && x.caravanas.length ? `<b>${x.caravanas.length}</b> caravanas${x.cantidad > x.caravanas.length ? ` · ${x.cantidad - x.caravanas.length} sin caravana` : ''}` : '';
+  let h = '';
+  if (F.col === 'compras' && x.cantidad > 0 && x.precio > 0) h = `Costo total <b>${fmtM(costoCompra(x))}</b> · por cabeza <b>${fmtM(costoCompra(x) / x.cantidad)}</b>`;
+  if (F.col === 'ventas') h = `Vacas en stock hoy: <b>${S.vacas.n}</b>` + (x.cantidad > 0 && x.precio > 0 ? ` · cobrado neto <b>${fmtM(netoVenta(x))}</b> (${fmtM(netoVenta(x) / x.cantidad)} por cabeza)` : '');
+  if (key === 'bajasV') h = `Vacas en stock hoy: <b>${S.vacas.n}</b>`;
+  if (key === 'bajasC' || F.col === 'pases') h = `Crías en stock hoy: <b>${S.crias.n}</b>`;
+  if (F.col === 'pases' && x.destino === 'terneros' && x.cantidad > 0) h += ` · se crea un lote de <b>${x.cantidad}</b> terneros${x.valor ? ` valuado en <b>${fmtM(x.valor * x.cantidad)}</b>` : ' (sin valor: la ganancia del ternero va a ser todo lo que se cobre)'}`;
+  if (F.col === 'gastos' && !errorPeriodo({tipo:x.tipo, periodo:x.periodo, dias:x.dias, anios:x.anios})){
+    const p = periodoDias(x), len = p.end - p.start, t = gastoTotal(x);
+    h = `Del <b>${fmtF(diaAFecha(p.start))}</b> al <b>${fmtF(diaAFecha(p.end - 1))}</b> · ${fmtN(len)} días` + (t ? `<br>Total <b>${fmtM(t)}</b> · ${fmtM(t / len * 30.4)} por mes` : '');
+  }
+  return `<div class="preview">${[h, car].filter(Boolean).join('<br>')}</div>`;
+}
+function vReset(key){
+  const F = VFORMS[key], f = $('#vf-' + key);
+  delete vEdit[key]; f.reset();
+  for (const c of F.campos){
+    if (c.n === 'fecha' || c.n === 'desde') f.elements[c.n].value = hoy();
+    if (c.n === 'mes') f.elements.mes.value = hoy().slice(0, 7);
+    if (c.n === 'anio') f.elements.anio.value = hoy().slice(0, 4);
+    if (c.n === 'anios') f.elements.anios.value = '1';
+  }
+  f.querySelector('.vtit').textContent = F.tit; f.querySelector('.vcancel').hidden = true; f.classList.remove('editing');
+  vActualizar(key);
+}
+function paseACompra(p, compraPrev){
+  return {id: compraPrev ? compraPrev.id : uid(), creado: compraPrev ? compraPrev.creado : Date.now(),
+    fecha:p.fecha, cantidad:p.cantidad, kg:p.kg || 0, modo:'total', precio:(p.valor || 0) * p.cantidad, gastos:0,
+    tercero:'Cría propia', obs:p.obs || '', origen:'cria', paseId:p.id,
+    ...(p.caravanas && p.caravanas.length ? {caravanas:p.caravanas} : {}),
+    ...(compraPrev && compraPrev.asignaciones ? {asignaciones:compraPrev.asignaciones} : {})};
+}
+async function vGuardar(key){
+  const F = VFORMS[key], x = vLeer(key), err = vValidar(key, x);
+  if (err) return avisar(err);
+  delete x._pc;
+  const prev = vEdit[key] ? vdb[F.col].find(i => i.id === vEdit[key]) : null;
+  const item = {...x, id: prev ? prev.id : uid(), creado: prev ? prev.creado : Date.now()};
+  const nuevoV = {...vdb, [F.col]: prev ? vdb[F.col].map(i => i.id === prev.id ? item : i) : [...vdb[F.col], item]};
+  const r = vcalc(nuevoV);
+  if (r.errores.length) return avisar(`<b>No se puede guardar.</b><br>${esc(r.errores[0].msg)}`);
+  // un pase a terneros crea (o actualiza) un lote en Terneros → Compras
+  let nuevoT = db;
+  if (F.col === 'pases'){
+    const compraPrev = prev && prev.compraId ? db.compras.find(c => c.id === prev.compraId) : null;
+    if (item.destino === 'terneros'){
+      if (item.caravanas && item.caravanas.length){
+        const us = caravanasUsadas(compraPrev ? compraPrev.id : null), rep = item.caravanas.find(t => us.has(t) && !(compraPrev && (compraPrev.caravanas || []).includes(t)));
+        if (rep) return avisar(`La caravana ${esc(rep)} ya está en terneros (${us.get(rep)}).`);
+      }
+      const comp = paseACompra(item, compraPrev); item.compraId = comp.id;
+      nuevoT = {...db, compras: compraPrev ? db.compras.map(c => c.id === compraPrev.id ? comp : c) : [...db.compras, comp]};
+    } else if (compraPrev){
+      delete item.compraId; nuevoT = {...db, compras: db.compras.filter(c => c.id !== compraPrev.id)};
+    }
+    if (nuevoT !== db){ const t = probar(nuevoT); if (!t.ok) return avisar(t.msg + '<br><br>Ese lote de terneros ya tiene ventas o bajas: corregilas primero en Terneros → Ventas.'); }
+  }
+  vdb = nuevoV; if (nuevoT !== db){ db = nuevoT; guardarLocal(); }
+  saveV(); vReset(key); render();
+}
+function vEditar(col, id){
+  const x = vdb[col].find(i => i.id === id), key = vFormDe(col, x);
+  const pag = Object.keys(VPAG).find(p => VPAG[p].forms.includes(key));
+  vSetForm(pag, key); vLlenar(key, x); vEdit[key] = id;
+  const f = $('#vf-' + key);
+  f.querySelector('.vtit').textContent = 'Editando: ' + VFORMS[key].tit.toLowerCase(); f.querySelector('.vcancel').hidden = false; f.classList.add('editing');
+  vActualizar(key); f.scrollIntoView({block:'start'}); window.scrollBy(0, -70);
+}
+async function vBorrar(col, id){
+  const x = vdb[col].find(i => i.id === id);
+  if (await ask(`<h2>¿Borrar este movimiento?</h2><p style="font-size:14px">${esc(vTipoTxt(col, x))}${x.fecha ? ' del ' + fmtF(x.fecha) : ''}. No se puede deshacer.</p>`,
+    [['si','Borrar','danger'], ['no','Cancelar']]) !== 'si') return;
+  const nuevoV = {...vdb, [col]: vdb[col].filter(i => i.id !== id)};
+  const r = vcalc(nuevoV);
+  if (r.errores.length) return avisar(`<b>No se puede borrar.</b><br>${esc(r.errores[0].msg)}<br><br>Primero corregí ese movimiento.`);
+  let nuevoT = db;
+  if (col === 'pases' && x.compraId){
+    nuevoT = {...db, compras: db.compras.filter(c => c.id !== x.compraId)};
+    const t = probar(nuevoT); if (!t.ok) return avisar(t.msg + '<br><br>Ese lote de terneros ya tiene ventas o bajas: corregilas primero en Terneros → Ventas.');
+  }
+  vdb = nuevoV; if (nuevoT !== db){ db = nuevoT; guardarLocal(); }
+  saveV(); render();
+}
+
+/* ---------- páginas ---------- */
+function vTipoTxt(col, x){
+  return {stock:'Stock inicial', compras:'Compra', ventas:'Venta', nacimientos:'Nacimiento',
+    pases: x.destino === 'terneros' ? 'Pase a terneros' : 'Pase a vacas', bajas:`Baja · ${x.motivo || 'Otro'}`, gastos:'Gastos'}[col];
+}
+function vFilas(col, x){
+  const r = [];
+  if (col === 'compras'){ if (x.kg) r.push(['Kilos', `${fmtN(x.kg)} kg`]); r.push(['Costo total', fmtM(costoCompra(x))], ['Por cabeza', fmtM(costoCompra(x) / x.cantidad)]); }
+  if (col === 'ventas'){ if (x.kg) r.push(['Kilos', `${fmtN(x.kg)} kg`]); r.push(['Cobrado neto', fmtM(netoVenta(x))], ['Por cabeza', fmtM(netoVenta(x) / x.cantidad)]); }
+  if (col === 'nacimientos'){ if (x.machos || x.hembras) r.push(['Machos / hembras', `${x.machos || 0} / ${x.hembras || 0}`]); if (x.madres) r.push(['Madres', esc(x.madres)]); }
+  if (col === 'pases' && x.destino === 'terneros'){ r.push(['Valor del lote', fmtM((x.valor || 0) * x.cantidad)]); if (x.kg) r.push(['Kilos', `${fmtN(x.kg)} kg`]); }
+  if (col === 'gastos'){
+    if (x.campoHa || x.campoCosto) r.push([`Campo${x.campoHa ? ` (${fmtN(x.campoHa, 1)} ha)` : ''}`, fmtM(x.campoCosto)]);
+    if (x.veterinaria) r.push(['Veterinaria', fmtM(x.veterinaria)]);
+    if (x.empleado) r.push(['Empleado', fmtM(x.empleado)]);
+    if (x.otros) r.push([`Otros${x.otrosDesc ? ` (${esc(x.otrosDesc)})` : ''}`, fmtM(x.otros)]);
+    r.push(['<b>Total</b>', `<b>${fmtM(gastoTotal(x))}</b>`]);
+  }
+  return r;
+}
+function vTarjeta(col, x){
+  const err = VR.errores.find(e => e.col === col && e.id === x.id);
+  const tit = col === 'gastos' ? periodoTxt(x) : `${fmtF(x.fecha)} · ${x.cantidad} ${x.categoria === 'crias' || col === 'nacimientos' || col === 'pases' ? (x.cantidad === 1 ? 'cría' : 'crías') : (x.cantidad === 1 ? 'vaca' : 'vacas')}`;
+  const filas = vFilas(col, x);
+  return `<div class="card item">
+    <div class="top"><span class="title">${tit}</span><span class="tag" style="background:var(--accent-2);color:${col === 'bajas' ? 'var(--bad)' : 'var(--accent)'}">${vTipoTxt(col, x)}</span></div>
+    ${filas.length ? `<div class="rows">${filas.map(([a, b]) => `<span>${a}</span><span class="r">${b}</span>`).join('')}</div>` : ''}
+    ${x.caravanas && x.caravanas.length ? `<div class="sub">Caravanas: ${esc(rangos(x.caravanas))}</div>` : ''}
+    ${col === 'pases' && x.destino === 'terneros' ? '<div class="sub">Figura como lote en Terneros → Compras.</div>' : ''}
+    ${x.tercero ? `<div class="sub">${esc(x.tercero)}</div>` : ''}${x.obs ? `<div class="sub">${esc(x.obs)}</div>` : ''}
+    ${err ? `<div class="alert bad">${esc(err.msg)}</div>` : ''}
+    <div class="btns"><button class="small" onclick="vEditar('${col}','${x.id}')">Editar</button><button class="small danger" onclick="vBorrar('${col}','${x.id}')">Borrar</button></div></div>`;
+}
+function vSetForm(pag, key){
+  const P = VPAG[pag];
+  P.forms.forEach((k, i) => { $('#vf-' + k).hidden = k !== key; const b = $(`#tab-v-${pag} [data-vform="${k}"]`); if (b) b.classList.toggle('on', k === key); });
+}
+function vInit(){
+  for (const [pag, P] of Object.entries(VPAG)){
+    $(`#tab-v-${pag}`).innerHTML = `<div class="vsum"></div>
+      ${P.seg ? `<div class="seg" style="margin-bottom:12px">${P.forms.map((k, i) => `<button type="button" data-vform="${k}">${P.seg[i]}</button>`).join('')}</div>` : ''}
+      ${P.forms.map(vFormHTML).join('')}
+      <h3>${P.listaTit}</h3><div class="vlist"></div>`;
+    P.forms.forEach(k => {
+      const f = $('#vf-' + k);
+      f.oninput = () => vActualizar(k); f.onchange = () => vActualizar(k);
+      f.onsubmit = e => { e.preventDefault(); vGuardar(k); };
+      f.querySelector('.vcancel').onclick = () => vReset(k);
+      vReset(k);
+    });
+    $(`#tab-v-${pag}`).querySelectorAll('[data-vform]').forEach(b => b.onclick = () => vSetForm(pag, b.dataset.vform));
+    vSetForm(pag, P.forms[0]);
+  }
+  $('#tab-v-resumen').innerHTML = `<div id="vResumen"></div>
+    <h3>Exportar (se abre en Excel)</h3><div class="card"><div class="btnlist">
+      <button onclick="vExportar('mov')">Movimientos de vacas</button><button onclick="vExportar('gastos')">Gastos de vacas</button></div></div>`;
+}
+function vRender(){
+  VR = vcalc(vdb);
+  const S = VR.S, alerta = VR.errores.length ? `<div class="alert bad">Hay movimientos con problemas: ${esc(VR.errores[0].msg)}</div>` : '';
+  const sum = `<div class="kpis"><div class="kpi"><div class="l">Vacas en stock</div><div class="v">${S.vacas.n}</div></div>
+    <div class="kpi"><div class="l">Crías en stock</div><div class="v">${S.crias.n}</div></div></div>`;
+  for (const [pag, P] of Object.entries(VPAG)){
+    const sec = $(`#tab-v-${pag}`);
+    let extra = '';
+    if (pag === 'stock' && S.vacas.tags.size) extra = `<div class="card"><div class="sub">Caravanas de vacas en stock: ${esc(rangos([...S.vacas.tags]))}${S.vacas.n > S.vacas.tags.size ? ` · ${S.vacas.n - S.vacas.tags.size} sin caravana` : ''}</div></div>`;
+    if (pag === 'cria' && S.crias.tags.size) extra = `<div class="card"><div class="sub">Caravanas de crías en stock: ${esc(rangos([...S.crias.tags]))}${S.crias.n > S.crias.tags.size ? ` · ${S.crias.n - S.crias.tags.size} sin caravana` : ''}</div></div>`;
+    sec.querySelector('.vsum').innerHTML = alerta + (pag === 'gastos' ? '' : sum) + extra;
+    const items = [];
+    for (const [col, filtro] of P.lista) for (const x of vdb[col]) if (!filtro || filtro(x)) items.push([col, x]);
+    const orden = ([c, x]) => c === 'gastos' ? periodoDias(x).start : dayNum(x.fecha);
+    items.sort((a, b) => orden(b) - orden(a) || (b[1].creado || 0) - (a[1].creado || 0));
+    sec.querySelector('.vlist').innerHTML = items.length ? items.map(([c, x]) => vTarjeta(c, x)).join('') : '<div class="empty">Todavía no hay nada cargado.</div>';
+    P.forms.forEach(k => vActualizar(k));
+  }
+  vRenderResumen();
+}
+// parte de un gasto que cae en un año (o todo, si anio está vacío)
+function parteGasto(g, anio){
+  if (!anio) return gastoTotal(g);
+  const p = periodoDias(g), a = dayNum(`${anio}-01-01`), b = dayNum(`${+anio + 1}-01-01`);
+  return gastoTotal(g) * Math.max(0, Math.min(p.end, b) - Math.max(p.start, a)) / (p.end - p.start);
+}
+function vNumeros(anio){
+  const en = x => !anio || (x.fecha || '').startsWith(anio), suma = (arr, fn) => arr.reduce((s, x) => s + fn(x), 0);
+  const ventas = vdb.ventas.filter(en), compras = vdb.compras.filter(en), pasesT = vdb.pases.filter(x => en(x) && x.destino === 'terneros');
+  const o = {
+    nac: suma(vdb.nacimientos.filter(en), x => x.cantidad),
+    bajasV: suma(vdb.bajas.filter(x => en(x) && x.categoria === 'vacas'), x => x.cantidad),
+    bajasC: suma(vdb.bajas.filter(x => en(x) && x.categoria === 'crias'), x => x.cantidad),
+    pasesV: suma(vdb.pases.filter(x => en(x) && x.destino === 'vacas'), x => x.cantidad),
+    pasesT: suma(pasesT, x => x.cantidad), pasesTval: suma(pasesT, x => (x.valor || 0) * x.cantidad),
+    ventasN: suma(ventas, x => x.cantidad), ventasNeto: suma(ventas, netoVenta),
+    comprasN: suma(compras, x => x.cantidad), comprasCosto: suma(compras, costoCompra),
+    gastos: suma(vdb.gastos, g => parteGasto(g, anio)),
+  };
+  o.resultado = o.ventasNeto + o.pasesTval - o.comprasCosto - o.gastos;
+  return o;
+}
+function vRenderResumen(){
+  const box = $('#vResumen'); if (!box) return;
+  const anio = hoy().slice(0, 4), A = vNumeros(anio), T = vNumeros(''), S = VR.S;
+  const fila = (l, a, t, cls) => `<tr><td>${l}</td><td class="${cls || ''}">${a}</td><td class="${cls || ''}">${t}</td></tr>`;
+  box.innerHTML = `${VR.errores.length ? `<div class="alert bad">Hay movimientos con problemas: ${esc(VR.errores[0].msg)}</div>` : ''}
+    <div class="kpis"><div class="kpi"><div class="l">Vacas en stock</div><div class="v">${S.vacas.n}</div></div>
+      <div class="kpi"><div class="l">Crías en stock</div><div class="v">${S.crias.n}</div></div>
+      <div class="kpi" style="grid-column:1/-1"><div class="l">Resultado ${anio}</div><div class="v ${signo(A.resultado)}">${fmtM(A.resultado)}</div>
+        <div class="l">ventas + crías pasadas a terneros − compras − gastos</div></div></div>
+    <div class="card"><table><thead><tr><th></th><th>${anio}</th><th>Total</th></tr></thead><tbody>
+      ${fila('Nacimientos', A.nac, T.nac)}
+      ${fila('Bajas de vacas', A.bajasV, T.bajasV, A.bajasV ? 'neg' : '')}
+      ${fila('Bajas de crías', A.bajasC, T.bajasC, A.bajasC ? 'neg' : '')}
+      ${fila('Crías pasadas a vacas', A.pasesV, T.pasesV)}
+      ${fila('Crías pasadas a terneros', A.pasesT, T.pasesT)}
+      ${fila('Vacas compradas', A.comprasN, T.comprasN)}
+      ${fila('Vacas vendidas', A.ventasN, T.ventasN)}
+      <tr><td colspan="3" style="padding-top:12px;font-weight:700;text-align:left">Plata</td></tr>
+      ${fila('Ventas (neto)', fmtM(A.ventasNeto), fmtM(T.ventasNeto))}
+      ${fila('Valor de crías pasadas a terneros', fmtM(A.pasesTval), fmtM(T.pasesTval))}
+      ${fila('Compras', '−' + fmtM(A.comprasCosto), '−' + fmtM(T.comprasCosto))}
+      ${fila('Gastos', '−' + fmtM(A.gastos), '−' + fmtM(T.gastos))}
+      ${fila('<b>Resultado</b>', `<b>${fmtM(A.resultado)}</b>`, `<b>${fmtM(T.resultado)}</b>`, signo(A.resultado))}
+    </tbody></table>
+    <div class="hint" style="margin-top:8px">Los gastos de varios meses o años se cuentan en proporción a los días que caen en ${anio}.</div></div>`;
+}
+const vExportes = {
+  mov: () => {
+    const filas = [];
+    for (const col of Object.keys(VMOV)) for (const x of vdb[col]){
+      const det = col === 'compras' ? `Costo ${fmtM(costoCompra(x))}` : col === 'ventas' ? `Cobrado neto ${fmtM(netoVenta(x))}`
+        : col === 'pases' && x.destino === 'terneros' ? `Valor ${fmtM((x.valor || 0) * x.cantidad)}` : col === 'nacimientos' && (x.machos || x.hembras) ? `${x.machos || 0} machos, ${x.hembras || 0} hembras` : '';
+      const cat = col === 'stock' || col === 'bajas' ? (x.categoria === 'crias' ? 'Crías' : 'Vacas') : col === 'nacimientos' || col === 'pases' ? 'Crías' : 'Vacas';
+      filas.push([x.fecha, [fmtF(x.fecha), vTipoTxt(col, x), cat, x.cantidad, rangos(x.caravanas || []), det, x.tercero || '', x.obs || '']]);
+    }
+    filas.sort((a, b) => a[0] < b[0] ? -1 : 1);
+    return [['Fecha','Movimiento','Categoría','Cantidad','Caravanas','Detalle','Vendedor / comprador','Observaciones'], ...filas.map(f => f[1])];
+  },
+  gastos: () => [['Período','Desde','Hasta','Días','Campo ha','Campo $','Veterinaria $','Empleado $','Otros $','Detalle otros','Total $','Observaciones'],
+    ...[...vdb.gastos].sort((a, b) => periodoDias(a).start - periodoDias(b).start).map(g => { const p = periodoDias(g);
+      return [periodoTxt(g), fmtF(diaAFecha(p.start)), fmtF(diaAFecha(p.end - 1)), p.end - p.start, g.campoHa || 0, g.campoCosto || 0, g.veterinaria || 0, g.empleado || 0, g.otros || 0, g.otrosDesc || '', gastoTotal(g), g.obs || '']; })],
+};
+function vExportar(k){ descargarArchivo(`vacas-${k === 'mov' ? 'movimientos' : 'gastos'}-${hoy()}.csv`, csv(vExportes[k]()), 'text/csv;charset=utf-8'); }
+vInit();
+
+/* =====================================================================
+   GOOGLE DRIVE: sincronización con una planilla propia de la persona
+   ===================================================================== */
+// ID de la planilla modelo (ver drive/COMO-ARMAR-LA-PLANTILLA.md). Vacío = todavía no se armó.
+const PLANTILLA_ID = '';
+const DKEY = KEY + '-drive';
+function loadDrive(){ try { const d = JSON.parse(localStorage.getItem(DKEY)); if (d) return d; } catch(e){} return {}; }
+let drive = loadDrive();            // {url, clave, version, sucio, ultimo, omitido}
+function guardarDrive(){ try { localStorage.setItem(DKEY, JSON.stringify(drive)); } catch(e){} }
+let cambios = 0, syncTimer = null, sincronizando = false, syncError = '';
+
+function marcarCambio(){
+  cambios++;
+  if (!drive.url){
+    // desconectado de una planilla conocida: se anota que hay cambios para subirlos al reconectar
+    if (drive.ultimaUrl && !drive.cambiosSinSubir){ drive.cambiosSinSubir = true; guardarDrive(); }
+    return;
+  }
+  drive.sucio = true; guardarDrive(); programarSync(4000);
+}
+function programarSync(ms){ if (!drive.url) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => sincronizar(false), ms); }
+function nuevaClave(){
+  const a = new Uint8Array(24); crypto.getRandomValues(a);
+  return Array.from(a, b => b.toString(36).padStart(2, '0')).join('').slice(0, 32);
+}
+const movVacas = () => Object.values(vdb).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0);
+const hayDatosLocales = () => db.compras.length + db.ventas.length + db.gastos.length + movVacas() > 0;
+const resumenLocal = () => `${db.compras.length} compras, ${db.ventas.length} ventas, ${db.gastos.length} cargas de gastos, ${movVacas()} movimientos de vacas`;
+function paquete(){ return {...dbDesde(db), inflManual:infl.manual, vacas:vdb}; }
+function tablasParaPlanilla(){
+  R = calc(db);
+  return {Compras:exportes.compras(), Ventas:exportes.ventas(), Stock:exportes.stock(), Gastos:exportes.gastos(),
+          'Por persona':exportes.personas(), 'Vacas - Movimientos':vExportes.mov(), 'Vacas - Gastos':vExportes.gastos()};
+}
+function aplicarRemoto(d){
+  d = d || {};
+  db = dbDesde(d);
+  guardarLocal();                                  // sin marcar cambio: viene de Drive
+  vdb = {...vVacio(), ...(d.vacas || {})}; guardarVLocal();
+  infl.manual = d.inflManual || {}; saveInfl();
+  cancelar('C'); cancelar('V'); cancelar('G'); render();
+}
+
+// Pedido a la planilla. Se usa text/plain para que el navegador no haga una consulta previa (CORS).
+async function api(accion, extra, url, clave){
+  url = url || drive.url; clave = clave || drive.clave;
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 45000);
+  let txt;
+  try {
+    const r = await fetch(url, {method:'POST', redirect:'follow', signal:ctrl.signal,
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({accion, clave, ...extra})});
+    txt = await r.text();
+  } catch(e){ throw {error:'red'}; } finally { clearTimeout(t); }
+  try { return JSON.parse(txt); } catch(e){ throw {error:'respuesta'}; }   // devolvió una página: casi siempre es el acceso mal elegido
+}
+const ERRORES = {
+  red: 'No se pudo conectar. Revisá que haya internet.',
+  respuesta: 'La dirección no respondió como la app espera. Revisá que termine en /exec y que en "Quién tiene acceso" hayas elegido "Cualquier usuario".',
+  clave: 'Esta planilla ya está conectada a otro celular. Pegá la clave de ese celular (en ese celular: Resumen → Google Drive → Clave para otro celular).',
+  no_conectada: 'La planilla se desconectó. Volvé a conectarla desde Resumen → Google Drive.',
+  ocupado: 'La planilla está ocupada. Probá de nuevo en un minuto.',
+  sin_clave: 'Falta la clave de conexión.',
+};
+const textoError = e => ERRORES[(e && e.error) || e] || 'Algo salió mal al sincronizar.';
+
+async function subir(forzar){
+  const n = cambios;
+  const r = await api('subir', {base:drive.version || 0, forzar:!!forzar, datos:paquete(), tablas:tablasParaPlanilla(), resumen:resumenLocal()});
+  if (r.ok){ drive.version = r.version; if (cambios === n) drive.sucio = false; drive.ultimo = new Date().toISOString(); guardarDrive(); }
+  return r;
+}
+async function bajar(){
+  const r = await api('bajar', {});
+  if (!r.ok) throw r;
+  aplicarRemoto(r.datos); drive.version = r.version; drive.sucio = false; drive.ultimo = new Date().toISOString(); guardarDrive();
+}
+
+async function sincronizar(manual){
+  if (!drive.url || sincronizando) return;
+  if (!navigator.onLine){ syncError = 'Sin internet. Se sincroniza solo cuando vuelva la conexión.'; renderDrive(); return; }
+  sincronizando = true; syncError = ''; renderDrive();
+  try {
+    if (drive.sucio){
+      const r = await subir(false);
+      if (!r.ok && r.error === 'conflicto') await resolverConflicto(r);
+      else if (!r.ok) throw r;
+    } else {
+      const r = await api('estado', {});
+      if (!r.ok) throw r;
+      if (r.version > (drive.version || 0)) await bajar();                    // otro celular subió cambios
+      else if (r.version < (drive.version || 0)){ drive.sucio = true; await subir(true); }   // la planilla quedó atrás (por ejemplo, se reemplazó)
+      else { drive.ultimo = new Date().toISOString(); guardarDrive(); }
+    }
+    if (manual) avisar('<span class="ok">✓</span> Sincronizado con Google Drive.');
+  } catch(e){
+    syncError = textoError(e);
+    if (manual) avisar(syncError);
+  } finally { sincronizando = false; renderDrive(); }
+}
+async function resolverConflicto(r){
+  const q = await ask(`<h2>Los datos de Drive cambiaron</h2>
+    <p style="font-size:14px">Desde otro celular se subieron cambios${r.actualizado ? ` el ${new Date(r.actualizado).toLocaleString('es-AR')}` : ''}${r.resumen ? ` (${esc(r.resumen)})` : ''}, y este celular también tiene cambios sin subir.</p>
+    <p style="font-size:14px">¿Cuáles querés conservar?</p>`,
+    [['drive','Traer los de Drive (se pierden los de este celular)'], ['cel','Subir los de este celular (pisa Drive)'], ['no','Decidir más tarde']]);
+  if (q === 'drive') await bajar();
+  else if (q === 'cel'){ const s = await subir(true); if (!s.ok) throw s; }
+  else syncError = 'Hay cambios en Drive y en este celular. Tocá "Sincronizar ahora" para elegir.';
+}
+
+// Primera conexión (desde la guía)
+async function conectarDrive(url, claveIngresada){
+  const clave = claveIngresada || drive.clave || (url === drive.ultimaUrl && drive.ultimaClave) || nuevaClave();
+  const r = await api('conectar', {}, url, clave);
+  if (!r.ok) throw r;
+  drive = {url, clave, version:0, sucio:false, ultimo:null};
+  if (r.version === 0){                                      // planilla nueva
+    if (hayDatosLocales() || Object.keys(infl.manual).length){ drive.sucio = true; const s = await subir(true); if (!s.ok) throw s; }
+  } else if (!hayDatosLocales()){
+    await bajar();                                           // celular nuevo: trae todo
+  } else {
+    const q = await ask(`<h2>Hay datos en los dos lados</h2>
+      <p style="font-size:14px"><b>En Drive:</b> ${esc(r.resumen || 'datos guardados')}${r.actualizado ? ` (actualizado el ${new Date(r.actualizado).toLocaleDateString('es-AR')})` : ''}.</p>
+      <p style="font-size:14px"><b>En este celular:</b> ${resumenLocal()}.</p><p style="font-size:14px">¿Cuáles querés conservar? Los otros se reemplazan.</p>`,
+      [['drive','Usar los de Drive','primary'], ['cel','Usar los de este celular']]);
+    if (q === 'cel'){ drive.sucio = true; const s = await subir(true); if (!s.ok) throw s; }
+    else await bajar();
+  }
+  drive.ultimo = new Date().toISOString(); guardarDrive(); syncError = ''; render();
+}
+
+/* ---------- tarjeta en Resumen ---------- */
+function haceCuanto(iso){
+  if (!iso) return 'nunca';
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return 'recién'; if (m < 60) return `hace ${m} min`;
+  const h = Math.round(m / 60); if (h < 24) return `hace ${h} h`;
+  return `el ${new Date(iso).toLocaleDateString('es-AR')}`;
+}
+function renderDrive(){
+  const est = $('#driveEstado'), btns = $('#driveBtns');
+  if (!est) return;
+  if (!drive.url){
+    if (drive.ultimaUrl){       // ya se había cargado una dirección: no se vuelve a pedir
+      est.innerHTML = 'Desconectado. La app recuerda tu planilla: podés volver a conectarla sin cargar nada.';
+      btns.innerHTML = `<button class="primary" id="btnReconectar" style="grid-column:1/-1" onclick="reconectarDrive()">Reconectar mi planilla</button>
+        <button style="grid-column:1/-1" onclick="abrirWiz(1)">Usar otra planilla</button>`;
+      return;
+    }
+    est.innerHTML = 'No conectado. Los datos están <b>solo en este celular</b>.';
+    btns.innerHTML = `<button class="primary" style="grid-column:1/-1" onclick="abrirWiz(0)">Conectar con Google Drive</button>`;
+    return;
+  }
+  est.innerHTML = sincronizando ? 'Sincronizando…'
+    : syncError ? `<span class="neg">${esc(syncError)}</span>`
+    : drive.sucio ? `Hay cambios sin subir. Última sincronización: ${haceCuanto(drive.ultimo)}.`
+    : `<span class="ok">✓ Conectado</span> · sincronizado ${haceCuanto(drive.ultimo)}.`;
+  btns.innerHTML = `<button class="primary" style="grid-column:1/-1" onclick="sincronizar(true)" ${sincronizando ? 'disabled' : ''}>Sincronizar ahora</button>
+    <button onclick="mostrarClave()">Clave para otro celular</button><button class="danger" onclick="desconectarDrive()">Desconectar</button>
+    <div class="hint" style="grid-column:1/-1">Conviene que cargue datos un solo celular. Los inversores pueden mirar la planilla: compartila desde Drive como <b>Lector</b>.</div>`;
+  renderAviso();
+}
+
+/* ---------- aviso de cuidado de datos (arriba de todo) ---------- */
+const AKEY = KEY + '-avisos';
+let avisos = (() => { try { return JSON.parse(localStorage.getItem(AKEY)) || {}; } catch(e){ return {}; } })();   // {ultimaCopia, posponerHasta}
+function guardarAvisos(){ try { localStorage.setItem(AKEY, JSON.stringify(avisos)); } catch(e){} }
+const diasDesde = iso => iso ? Math.floor((Date.now() - new Date(iso)) / 864e5) : Infinity;
+function renderAviso(){
+  const box = $('#aviso'); if (!box) return;
+  let msg = '', btn = '';
+  if (avisos.posponerHasta && new Date(avisos.posponerHasta) > new Date()) msg = '';
+  else if (!hayDatosLocales()) msg = '';
+  else if (!drive.url){
+    if (diasDesde(avisos.ultimaCopia) > 15){
+      msg = `<b>Tus datos están solo en este celular.</b> Si se borra el navegador o se pierde el teléfono, se pierden.${avisos.ultimaCopia ? ` Última copia: hace ${diasDesde(avisos.ultimaCopia)} días.` : ''}`;
+      btn = `<button class="small primary" onclick="${drive.ultimaUrl ? 'reconectarDrive()' : 'abrirWiz(0)'}">${drive.ultimaUrl ? 'Reconectar Drive' : 'Conectar Drive'}</button><button class="small" onclick="guardarCopia()">Guardar copia</button>`;
+    }
+  } else if (diasDesde(drive.ultimo) > 15){
+    msg = `<b>Hace ${drive.ultimo ? diasDesde(drive.ultimo) + ' días' : 'mucho'} que no se sincroniza con Google Drive.</b>${drive.sucio ? ' Hay cambios sin subir.' : ''}`;
+    btn = `<button class="small primary" onclick="sincronizar(true)">Sincronizar ahora</button>`;
+  } else if (drive.sucio && diasDesde(drive.ultimo) > 3){
+    msg = `<b>Hay cambios sin subir a Drive</b> desde hace ${diasDesde(drive.ultimo)} días.`;
+    btn = `<button class="small primary" onclick="sincronizar(true)">Sincronizar ahora</button>`;
+  }
+  box.innerHTML = msg ? `<div class="alert" style="margin:0 0 12px">${msg}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${btn}<button class="small" onclick="posponerAviso()">Recordar en 3 días</button></div></div>` : '';
+}
+function posponerAviso(){ avisos.posponerHasta = new Date(Date.now() + 3 * 864e5).toISOString(); guardarAvisos(); renderAviso(); }
+function mostrarClave(){
+  const txt = `Dirección: ${drive.url}\nClave: ${drive.clave}`;
+  ask(`<h2>Conectar otro celular</h2><p style="font-size:14px">En el otro celular, en la guía de conexión, pegá esta dirección y, en "¿Ya tenés otro celular conectado?", esta clave. No la compartas con nadie más.</p>
+    <div class="linkbox" style="white-space:pre-wrap">${esc(txt)}</div>`,
+    [['copiar','Copiar','primary'], ['ok','Cerrar']]).then(r => { if (r === 'copiar') copiarTexto(txt); });
+}
+async function desconectarDrive(){
+  if (await ask(`<h2>¿Desconectar de Google Drive?</h2><p style="font-size:14px">Los datos quedan en este celular y en la planilla, pero dejan de sincronizarse.</p>`,
+    [['si','Desconectar','danger'], ['no','Cancelar']]) !== 'si') return;
+  // se recuerda la dirección y la clave para poder reconectar con un toque, sin volver a pedirlas
+  drive = {omitido:true, ultimaUrl:drive.url, ultimaClave:drive.clave, ultimaVersion:drive.version || 0, cambiosSinSubir:!!drive.sucio};
+  guardarDrive(); syncError = ''; renderDrive();
+}
+// Reconectar la misma planilla: como la app sabe hasta qué versión había sincronizado,
+// solo sube o baja lo que cambió; pregunta únicamente si cambiaron los dos lados.
+async function reconectarDrive(){
+  const b = $('#btnReconectar'); if (b){ b.disabled = true; b.textContent = 'Conectando…'; }
+  const {ultimaUrl:url, ultimaClave:clave, ultimaVersion, cambiosSinSubir} = drive;
+  try {
+    if (ultimaVersion == null){ await conectarDrive(url, clave); }      // no se sabe qué versión tenía: se pregunta
+    else {
+      const r = await api('conectar', {}, url, clave);
+      if (!r.ok) throw r;
+      drive = {url, clave, version:ultimaVersion, sucio:!!cambiosSinSubir, ultimo:null}; guardarDrive();
+      await sincronizar(false);
+      if (syncError) throw syncError;
+    }
+    avisar('<span class="ok">✓</span> Conectado de nuevo con Google Drive.');
+  } catch(e){ avisar(typeof e === 'string' ? esc(e) : textoError(e)); }
+  renderDrive();
+}
+async function copiarTexto(t){
+  try { await navigator.clipboard.writeText(t); avisar('Copiado.'); }
+  catch(e){ ask(`<p style="font-size:14px">Mantené apretado el texto para copiarlo:</p><textarea style="height:100px">${esc(t)}</textarea>`, [['ok','Listo','primary']]); }
+}
+async function compartirTexto(t){
+  if (navigator.share){ try { await navigator.share({text:t}); return; } catch(e){ if (e.name === 'AbortError') return; } }
+  copiarTexto(t);
+}
+
+/* ---------- guía paso a paso ---------- */
+let wizPaso = 0;
+const enlaceCopia = () => PLANTILLA_ID ? `https://docs.google.com/spreadsheets/d/${PLANTILLA_ID}/copy` : '';
+const PASOS = [
+  () => ({html:`<span class="chip">Bienvenida</span><h2>¿Guardamos tus datos en Google Drive?</h2>
+      <p>Así no se pierden si cambiás o perdés el celular, y además los podés ver en una planilla desde la computadora.</p>
+      <p>Se hace <b>una sola vez</b>, tarda unos 10 minutos y <b>necesitás una computadora</b> para dos de los pasos.</p>
+      <p style="color:var(--muted);font-size:14px">Los datos quedan en <b>tu</b> Drive, en una planilla tuya. Nadie más tiene acceso.</p>`,
+    btns:`<button class="primary" onclick="wizIr(1)">Configurar ahora</button><button onclick="wizMasTarde()">Más tarde (la app funciona igual)</button>`}),
+  () => ({html:`<span class="chip">Paso 1 de 5</span><h2>Copiar la planilla</h2>
+      <p>Abrí este enlace <b>en la computadora</b>, con tu cuenta de Google:</p>
+      ${enlaceCopia() ? `<div class="linkbox">${esc(enlaceCopia())}</div>
+        <div class="fila" style="display:flex;gap:8px"><button style="flex:1" onclick="compartirTexto(enlaceCopia())">Mandármelo</button><button style="flex:1" onclick="copiarTexto(enlaceCopia())">Copiar</button></div>`
+        : `<div class="alert bad">Falta configurar la planilla modelo en la app (PLANTILLA_ID). Ver drive/COMO-ARMAR-LA-PLANTILLA.md.</div>`}
+      <div class="shot"><div class="t">Google te va a preguntar:</div>¿Quieres hacer una copia del archivo? &nbsp;<span class="gbtn gblue">Hacer una copia</span></div>
+      <p>Tocá <span class="gbtn">Hacer una copia</span>. Se abre <b>tu</b> planilla "Copia de Terneros", con una hoja <b>Inicio</b> que repite estos pasos.</p>`,
+    btns:`<button class="primary" onclick="wizIr(2)">Ya la copié</button>`}),
+  () => ({html:`<span class="chip">Paso 2 de 5 · en la computadora</span><h2>Activar la conexión</h2>
+      <ol class="pasos">
+        <li>En tu planilla, menú <span class="gbtn">Extensiones</span> → <span class="gbtn">Apps Script</span>.</li>
+        <li>Arriba a la derecha: <span class="gbtn gblue">Implementar ▾</span> → <span class="gbtn">Nueva implementación</span>.</li>
+        <li>Al lado de "Seleccionar tipo", tocá el engranaje ⚙ y elegí <span class="gbtn">Aplicación web</span>.</li>
+        <li>Revisá estas dos opciones:
+          <div class="shot"><div>Ejecutar como: <b>Yo</b></div><div>Quién tiene acceso: <b>Cualquier usuario</b></div></div>
+          Si "Quién tiene acceso" no dice <b>Cualquier usuario</b>, la app no se va a poder conectar.</li>
+        <li>Tocá <span class="gbtn gblue">Implementar</span>.</li>
+      </ol>`,
+    btns:`<button class="primary" onclick="wizIr(3)">Siguiente</button>`}),
+  () => ({html:`<span class="chip">Paso 3 de 5 · en la computadora</span><h2>Dar permiso</h2>
+      <p>Google pide permiso para que la conexión pueda escribir en tu planilla:</p>
+      <ol class="pasos">
+        <li><span class="gbtn gblue">Autorizar acceso</span> → elegí tu cuenta.</li>
+        <li>Va a aparecer un aviso como este. <b>Es normal</b>: la aplicación es tuya y Google no la revisó porque no es pública.
+          <div class="shot warn"><div class="t">⚠ Google no ha verificado esta aplicación</div>
+          <span style="text-decoration:underline">Configuración avanzada</span> → <span style="text-decoration:underline">Ir a Terneros (no seguro)</span></div></li>
+        <li>Tocá <b>Configuración avanzada</b>, después <b>Ir a Terneros (no seguro)</b> y por último <span class="gbtn gblue">Permitir</span>.</li>
+      </ol>
+      <p style="color:var(--muted);font-size:14px">El permiso es solo para <b>esa</b> planilla: no puede ver tu correo ni tus otros archivos.</p>`,
+    btns:`<button class="primary" onclick="wizIr(4)">Siguiente</button>`}),
+  () => ({html:`<span class="chip">Paso 4 de 5 · en la computadora</span><h2>Copiar la dirección</h2>
+      <p>Al terminar, Google muestra un cuadro como este:</p>
+      <div class="shot"><div class="t">Nueva implementación</div>Aplicación web<br>URL: <span style="word-break:break-all">https://script.google.com/macros/s/AKfy…/exec</span> &nbsp;<span class="gbtn">Copiar</span></div>
+      <p>Copiá esa <b>URL</b> (termina en <b>/exec</b>) y mandátela al celular: por WhatsApp a vos mismo, o por mail.</p>
+      <p style="color:var(--muted);font-size:14px">¿Cerraste el cuadro? En la planilla, menú <span class="gbtn">Terneros</span> → <span class="gbtn">Ver la dirección para la app</span>.</p>`,
+    btns:`<button class="primary" onclick="wizIr(5)">Ya la tengo en el celular</button>`}),
+  () => ({html:`<span class="chip">Paso 5 de 5 · en el celular</span><h2>Pegar la dirección</h2>
+      <label>Dirección (termina en /exec)</label><textarea id="wizUrl" placeholder="https://script.google.com/macros/s/…/exec" style="min-height:80px">${esc(drive.url || drive.ultimaUrl || '')}</textarea>
+      ${drive.ultimaUrl ? `<div class="hint">Es la dirección que cargaste antes. Si es la misma planilla, tocá Conectar.</div>` : ''}
+      <details style="margin-top:10px"><summary style="font-size:14px">¿Ya tenés otro celular conectado a esa planilla?</summary>
+        <label style="margin-top:8px">Clave del otro celular</label><input id="wizClave" autocomplete="off">
+        <div class="hint">En el otro celular: Resumen → Google Drive → Clave para otro celular.</div></details>
+      <div id="wizMsg"></div>`,
+    btns:`<button class="primary" id="wizConectar" onclick="wizConectar()">Conectar</button>`}),
+  () => ({html:`<span class="chip">Listo</span><h2><span class="ok">✓</span> Conectado con Google Drive</h2>
+      <p>Desde ahora, cada vez que cargues algo con internet, se guarda solo en tu planilla. Sin señal se guarda en el celular y se sube cuando vuelva la conexión.</p>
+      <p>En la planilla vas a ver las hojas <b>Compras</b>, <b>Ventas</b>, <b>Stock</b> y <b>Gastos</b> actualizadas.</p>`,
+    btns:`<button class="primary" onclick="cerrarWiz()">Empezar a usar la app</button>`}),
+];
+function abrirWiz(p){ wizPaso = p || 0; $('#wiz').hidden = false; document.body.style.overflow = 'hidden'; renderWiz(); }
+function cerrarWiz(){ $('#wiz').hidden = true; document.body.style.overflow = ''; }
+function wizIr(p){ wizPaso = p; renderWiz(); $('#wiz').scrollTop = 0; }
+function wizMasTarde(){ drive.omitido = true; guardarDrive(); cerrarWiz(); }
+function renderWiz(){
+  const s = PASOS[wizPaso]();
+  $('#wizDots').innerHTML = [1,2,3,4,5].map(i => `<span class="${i <= wizPaso ? 'on' : ''}"></span>`).join('');
+  $('#wizBody').innerHTML = s.html;
+  const atras = wizPaso > 0 && wizPaso < PASOS.length - 1 ? `<button onclick="wizIr(${wizPaso - 1})">Atrás</button>` : '';
+  const salir = wizPaso > 0 && wizPaso < PASOS.length - 1 ? `<button onclick="wizMasTarde()">Salir y seguir después</button>` : '';
+  $('#wizBtns').innerHTML = s.btns + (atras || salir ? `<div class="fila">${atras}${salir}</div>` : '');
+}
+async function wizConectar(){
+  const url = $('#wizUrl').value.trim(), clave = ($('#wizClave').value || '').trim(), msg = $('#wizMsg'), b = $('#wizConectar');
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url)){
+    msg.innerHTML = `<div class="alert bad">La dirección tiene que empezar con <b>https://script.google.com/macros/s/</b> y terminar en <b>/exec</b>.${/\/dev$/.test(url) ? ' La que pegaste termina en /dev: es la de prueba, usá la de "Aplicación web".' : ''}</div>`; return;
+  }
+  if (clave && clave.length < 16){ msg.innerHTML = `<div class="alert bad">La clave parece incompleta.</div>`; return; }
+  b.disabled = true; b.textContent = 'Conectando…'; msg.innerHTML = '';
+  try { await conectarDrive(url, clave); wizIr(6); }
+  catch(e){ msg.innerHTML = `<div class="alert bad">${esc(textoError(e))}</div>`; b.disabled = false; b.textContent = 'Conectar'; }
+}
+
+window.addEventListener('online', () => programarSync(800));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') programarSync(800); });
+
+/* ---------- inicio ---------- */
+cancelar('C'); cancelar('V'); cancelar('G');
+{ let t = 'compras'; try { t = localStorage.getItem(KEY + '-tab') || 'compras'; } catch(e){}
+  t = {vacas:'vacas-stock', 'vacas-engorde':'vacas-gastos'}[t] || t; irA(t); }
+render();
+// si hay internet y los datos de inflación tienen más de 7 días, se actualizan solos
+if (navigator.onLine && (!infl.act || dayNum(hoy()) - dayNum(infl.act) > 7)) actualizarInflacion(true);
+// Drive: si está conectado, sincroniza al abrir. La bienvenida aparece solo si nunca se cargó una dirección
+// ni se eligió "Más tarde".
+if (drive.url) programarSync(1000);
+else if (!drive.omitido && !drive.ultimaUrl) abrirWiz(0);
+// pedirle al navegador que no borre los datos de la app (dirección incluida) para liberar espacio
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
+// se instala como app y queda guardada para abrir sin internet (solo funciona si la app está en https o localhost)
+if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
