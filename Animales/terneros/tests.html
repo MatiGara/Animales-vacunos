@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Tests de Terneros</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;max-width:760px;margin:20px auto;padding:0 12px}
+.ok{color:#1f7a3a}.mal{color:#b3261e;font-weight:600}h1{font-size:20px}</style></head>
+<body><h1>Tests de la lógica</h1><div id="out"></div>
+<script src="logica.js"></script>
+<script>
+"use strict";
+/* Abrir este archivo en el navegador (o con python -m http.server y /tests.html). No toca tus datos. */
+hoy = () => '2025-06-01';              // fecha fija para que los resultados no cambien con los días
+const casos = [];
+const test = (nombre, fn) => casos.push([nombre, fn]);
+const igual = (real, esperado, msg) => {
+  const a = JSON.stringify(real), b = JSON.stringify(esperado);
+  if (a !== b) throw new Error(`${msg || ''} esperado ${b}, salió ${a}`);
+};
+const casi = (real, esperado, msg) => { if (Math.abs(real - esperado) > 0.01) throw new Error(`${msg || ''} esperado ${esperado}, salió ${real}`); };
+
+let n = 0;
+const compra = (o) => ({id:'c' + (++n), fecha:'2025-01-01', cantidad:10, kg:2000, precio:1000, modo:'kg', gastos:0, creado:n, ...o});
+const venta  = (o) => ({id:'v' + (++n), fecha:'2025-03-01', cantidad:5, kg:1250, precio:1500, modo:'kg', gastos:0, creado:n, ...o});
+const datos  = (o) => ({compras:[], ventas:[], gastos:[], personas:[], pesadas:[], precios:[], fichas:[], ...o});
+
+/* ---------- números y caravanas ---------- */
+test('num: formatos argentinos', () => {
+  igual(num('1.234,50'), 1234.5); igual(num('1.500'), 1500); igual(num('$ 2.000.000'), 2000000);
+  igual(num('12,5'), 12.5); igual(num(''), 0); igual(num('abc'), 0);
+});
+test('parseCaravanas: rangos y repetidas', () => {
+  igual(parseCaravanas('1001-1003, 1010').list, ['1001', '1002', '1003', '1010']);
+  igual(parseCaravanas('A01-A03').list, ['A01', 'A02', 'A03']);
+  igual(parseCaravanas('1 1 2').dups, ['1']);
+  igual(parseCaravanas('1005-1001').errs, ['1005-1001']);
+});
+test('rangos: junta caravanas seguidas', () => {
+  igual(rangos(['1001', '1002', '1003', '1010']), '1001-1003, 1010');
+  igual(rangos([]), '');
+});
+
+/* ---------- costos ---------- */
+test('costoCompra: por kilo y precio total, más gastos', () => {
+  igual(costoCompra(compra({})), 2000000);
+  igual(costoCompra(compra({modo:'total', precio:900000})), 900000);
+  igual(costoCompra(compra({gastos:50000})), 2050000);
+});
+test('netoVenta: descuenta los gastos de la venta', () => {
+  igual(netoVenta(venta({gastos:75000})), 1875000 - 75000);
+});
+
+/* ---------- FIFO ---------- */
+test('venta sin gastos: ganancia = neto - costo de los terneros vendidos', () => {
+  const r = calc(datos({compras:[compra({})], ventas:[venta({})]}));
+  igual(r.errores.length, 0);
+  const v = r.ventasR[0];
+  casi(v.costo, 1000000); casi(v.neto, 1875000); casi(v.gan, 875000);
+  igual(r.enStock, 5);
+});
+test('FIFO: salen primero los lotes más viejos', () => {
+  const c1 = compra({fecha:'2025-01-01', cantidad:4}), c2 = compra({fecha:'2025-02-01', cantidad:6});
+  const r = calc(datos({compras:[c2, c1], ventas:[venta({cantidad:6})]}));   // el orden de carga no importa
+  igual(r.errores.length, 0);
+  const p = r.ventasR[0].pieces.map(x => [x.L.c.id, x.n]);
+  igual(p, [[c1.id, 4], [c2.id, 2]]);
+  igual(r.enStock, 4);
+});
+test('no se puede vender más de lo que hay', () => {
+  const r = calc(datos({compras:[compra({cantidad:3})], ventas:[venta({cantidad:5})]}));
+  igual(r.errores.length, 1);
+});
+test('no se puede vender antes de comprar', () => {
+  const r = calc(datos({compras:[compra({fecha:'2025-05-01'})], ventas:[venta({fecha:'2025-03-01'})]}));
+  igual(r.errores.length, 1);
+});
+
+/* ---------- gastos de engorde ---------- */
+test('gasto mensual se reparte por día y por animal', () => {
+  // 310.000 en enero con 10 animales = 1.000 por animal por día; 5 salen el 1/2 después de 31 días
+  const g = {id:'g1', tipo:'mes', periodo:'2025-01', otros:310000};
+  const r = calc(datos({compras:[compra({})], ventas:[venta({fecha:'2025-02-01'})], gastos:[g]}));
+  igual(r.errores.length, 0);
+  casi(r.ventasR[0].engorde, 5 * 31 * 1000);
+  casi(r.sinAsignar, 0);
+});
+test('el gasto de un mes sin animales queda como "sin asignar"', () => {
+  const g = {id:'g1', tipo:'mes', periodo:'2025-01', otros:310000};
+  const r = calc(datos({compras:[compra({fecha:'2025-02-01'})], gastos:[g]}));
+  casi(r.sinAsignar, 310000);
+});
+test('el gasto se reparte entre los animales presentes ese día', () => {
+  // febrero: hay 20 animales (10 de cada lote). El gasto de febrero se divide entre los 20.
+  const g = {id:'g1', tipo:'mes', periodo:'2025-02', otros:280000};
+  const r = calc(datos({compras:[compra({}), compra({fecha:'2025-02-01'})], gastos:[g]}));
+  const s = r.stock.map(x => x.engorde).sort((a, b) => a - b);
+  casi(s[0], 140000); casi(s[1], 140000);
+});
+
+/* ---------- caravanas en ventas ---------- */
+test('venta por caravana usa esas caravanas', () => {
+  const c = compra({caravanas:['1','2','3','4','5','6','7','8','9','10']});
+  const r = calc(datos({compras:[c], ventas:[venta({caravanas:['3','4'], cantidad:2})]}));
+  igual(r.errores.length, 0);
+  igual(r.tagInfo.get('3').venta.id, r.ventasR[0].v.id);
+  igual(r.tagInfo.get('5').venta, null);
+});
+test('caravana inexistente o repetida da error', () => {
+  const c = compra({caravanas:['1','2','3','4','5','6','7','8','9','10']});
+  const r1 = calc(datos({compras:[c], ventas:[venta({caravanas:['99'], cantidad:1})]}));
+  igual(r1.errores.length, 1);
+  const r2 = calc(datos({compras:[c], ventas:[venta({caravanas:['1'], cantidad:1}), venta({caravanas:['1'], cantidad:1, fecha:'2025-04-01'})]}));
+  igual(r2.errores.length, 1);
+});
+test('una venta general no se lleva las caravanas que otra venta pide por número', () => {
+  const c = compra({caravanas:['1','2','3','4','5','6','7','8','9','10']});
+  const pide = venta({caravanas:['1','2'], cantidad:2, fecha:'2025-04-01'});
+  const general = venta({cantidad:3, fecha:'2025-03-01'});
+  const r = calc(datos({compras:[c], ventas:[general, pide]}));
+  igual(r.errores.length, 0);
+});
+
+/* ---------- dueños y lotes compartidos ---------- */
+test('lote compartido por cantidad', () => {
+  const c = compra({duenos:[{id:'a', n:6}, {id:'b', n:4}]});
+  igual(esCompartido(c), true);
+  igual(partesDe(c), [['a', 0.6], ['b', 0.4]]);
+  igual(duenoDe(c), '__comp');
+});
+test('cría propia es del campo', () => {
+  igual(partesDe(compra({origen:'cria'})), [['campo', 1]]);
+});
+test('venta de una persona solo toma sus lotes', () => {
+  const ps = [{id:'a', nombre:'Ana'}, {id:'b', nombre:'Beto'}];
+  const ca = compra({dueno:'a', fecha:'2025-01-01', cantidad:5}), cb = compra({dueno:'b', fecha:'2025-01-02', cantidad:5});
+  const r = calc(datos({compras:[ca, cb], ventas:[venta({dueno:'b', cantidad:5})], personas:ps}));
+  igual(r.errores.length, 0);
+  igual(r.ventasR[0].pieces.map(p => p.L.c.id), [cb.id]);
+  const r2 = calc(datos({compras:[ca, cb], ventas:[venta({dueno:'b', cantidad:6})], personas:ps}));
+  igual(r2.errores.length, 1);
+});
+
+/* ---------- períodos ---------- */
+test('periodoDias: mes, año y días', () => {
+  const m = periodoDias({tipo:'mes', periodo:'2025-02'});  igual(m.end - m.start, 28);
+  const a = periodoDias({tipo:'anual', periodo:'2024'});   igual(a.end - a.start, 366);
+  const d = periodoDias({tipo:'dias', periodo:'2025-01-10', dias:15}); igual(d.end - d.start, 15);
+});
+
+/* ---------- inflación ---------- */
+test('niveles: acumula la inflación mes a mes y estima los meses sin dato', () => {
+  const antes = infl;
+  infl = {auto:{}, manual:{'2025-01':10, '2025-02':10}, act:null, fuente:''};
+  const N = niveles('2025-04');
+  infl = antes;
+  casi(N.L['2025-01'], 110); casi(N.L['2025-02'], 121); casi(N.L['2025-04'], 146.41);
+  igual(N.est.has('2025-03'), true);
+});
+test('con inflación, la ganancia real descuenta la suba de precios', () => {
+  const antes = infl;
+  infl = {auto:{}, manual:{'2025-01':0, '2025-02':10, '2025-03':10}, act:null, fuente:''};
+  const r = calc(datos({compras:[compra({fecha:'2025-01-15'})], ventas:[venta({fecha:'2025-03-15', cantidad:10})]}));
+  infl = antes;
+  const v = r.ventasR[0];
+  igual(v.realOk, true);
+  casi(v.costoR, 2000000 * 1.21);          // el costo de compra llevado a pesos de marzo
+  casi(v.ganR, v.neto - 2000000 * 1.21);
+});
+
+/* ---------- ejecutar ---------- */
+const out = document.getElementById('out'); let mal = 0;
+for (const [nombre, fn] of casos){
+  const li = document.createElement('div');
+  try { fn(); li.className = 'ok'; li.textContent = '✔ ' + nombre; }
+  catch(e){ mal++; li.className = 'mal'; li.textContent = '✘ ' + nombre + ' — ' + e.message; }
+  out.appendChild(li);
+}
+const res = document.createElement('h1');
+res.textContent = mal ? `${mal} de ${casos.length} con problemas` : `Todo bien: ${casos.length} pruebas`;
+out.prepend(res);
+document.title = (mal ? 'FALLA ' : 'OK ') + casos.length + ' pruebas';
+</script></body></html>
